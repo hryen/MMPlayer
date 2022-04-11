@@ -1,0 +1,57 @@
+{
+  "name": "MMPlayer",
+  "description": "my music player",
+  "version": "0.0.1",
+  "private": false,
+  "author": "henry",
+  "license": "MIT",
+  "main": "main.js",
+  "scripts": {
+    "release": "vite build && electron-builder",
+    "test": "vite build && electron .",
+    "dist": "vue-tsc --noEmit && vite build && electron-builder",
+    "start": "electron .",
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "build": {
+    "appId": "com.hryen.mmplayer",
+    "productName": "MMPlayer",
+    "extraFiles": [
+      {
+        "from": "tools",
+        "to": "tools",
+        "filter": [
+          "**/*.exe"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    }
+  },
+  "dependencies": {
+    "electron-window-state": "^5.0.3",
+    "iconv-lite": "^0.6.3",
+    "normalize.css": "^8.0.1",
+    "pinia": "^2.0.12",
+    "vue": "^3.2.25",
+    "wavesurfer.js": "^6.0.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^2.2.0",
+    "electron": "^17.2.0",
+    "electron-builder": "^22.14.13",
+    "typescript": "^4.5.4",
+    "vite": "^2.8.0",
+    "vue-tsc": "^0.29.8"
+  }
+}

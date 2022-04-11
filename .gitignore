@@ -1,0 +1,12 @@
+dist
+dist-html
+node_modules
+
+playLists.json
+playerSetting.json
+
+0.TODO
+设计
+
+yarn-debug.log*
+yarn-error.log*

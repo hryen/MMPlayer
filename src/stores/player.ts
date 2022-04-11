@@ -1,0 +1,364 @@
+import { defineStore, storeToRefs } from "pinia";
+import { Track } from "@/models/track";
+import { useMainStore } from "@/stores/main";
+import { PlayerSetting } from "@/models/playerSetting";
+
+export const usePlayerStore = defineStore("player", {
+  state: () => ({
+    wavesurfer: null as any,
+    volume: 80 as number,
+    playingTrackIndex: 0 as number,
+    playingPlayListIndex: 0 as number,
+    isPlaying: false as boolean,
+    track: {} as Track,
+    trackCurrentTime: "00:00" as string,
+    trackDuration: "00:00" as string,
+    coverArt: "./assets/album_black_48dp.svg" as string,
+    loopMode: "repeat" as string, // repeat, repeatOne, shuffle
+    prevTrackArray: [] as PrevTrack[],
+    shuffledTrackIndexArray: [] as number[],
+
+    volumeInterval: null as any,
+    trackCurrentTimeInterval: null as any,
+  }),
+  actions: {
+    init() {
+      // TODO:
+      const mainStore = useMainStore();
+      const { playLists } = storeToRefs(mainStore);
+
+      const WaveSurfer = require("wavesurfer.js");
+      WaveSurfer.cursor = require("wavesurfer.js/dist/plugin/wavesurfer.cursor");
+
+      var ctx = document.createElement("canvas").getContext("2d") as any;
+      var linGrad = ctx.createLinearGradient(0, 16, 0, 50);
+      linGrad.addColorStop(0.5, "#94BFFF");
+      linGrad.addColorStop(0.5, "#BEDAFF");
+
+      const options = {
+        container: "#player-controls__waveform",
+        height: 32,
+        responsive: 100,
+
+        waveColor: linGrad,
+        progressColor: "#4080FF",
+        cursorColor: "transparent",
+        barWidth: 2,
+        barHeight: 1,
+        barRadius: 2,
+
+        backend: "MediaElement",
+        hideScrollbar: true,
+        plugins: [
+          WaveSurfer.cursor.create({
+            color: "#165DFF",
+            width: "1px",
+            opacity: "1",
+            showTime: true,
+            customShowTimeStyle: {
+              "background-color": "#FFFFFF",
+              padding: "2px",
+              "margin-left": "6px",
+              "border-radius": "2px",
+              "font-size": "12px",
+              "font-family": "Arial",
+              "line-height": "12px",
+              "box-shadow": "0 0 2px #888",
+            },
+          }),
+        ],
+      };
+
+      this.wavesurfer = WaveSurfer.create(options);
+
+      // WaveSurfer Events
+      this.wavesurfer.on("play", this.handleOnPlay);
+      this.wavesurfer.on("pause", this.handleOnPause);
+      this.wavesurfer.on("seek", this.handleOnSeek);
+      this.wavesurfer.on("finish", this.handleOnFinish);
+      this.wavesurfer.on("destroy", this.handleOnDestroy);
+      this.wavesurfer.on("waveform-ready", this.handleOnWaveformReady);
+      this.wavesurfer.on("interaction", this.handleOnInteraction);
+
+      this.wavesurfer.setVolume(0.8);
+      // 读取保存的播放器设置
+      try {
+        const path = require("path");
+        const fs = require("fs");
+        const playerSettingFile = path.resolve(
+          process.cwd(),
+          "playerSetting.json"
+        );
+        const playerSetting: PlayerSetting = JSON.parse(
+          fs.readFileSync(playerSettingFile)
+        );
+
+        this.loopMode = playerSetting.loopMode;
+        if (playLists.value.length > 0) {
+          this.playingPlayListIndex = playerSetting.playingPlayListIndex;
+          this.playingTrackIndex = playerSetting.playingTrackIndex;
+          this.track =
+            playLists.value[this.playingPlayListIndex].tracks[
+              this.playingTrackIndex
+            ];
+
+          this.wavesurfer.load(this.track.path);
+          const that = this;
+          const seekToSaved = function () {
+            that.wavesurfer.seekTo(
+              playerSetting.trackCurrentTime / that.wavesurfer.getDuration()
+            );
+            that.wavesurfer.un("waveform-ready", seekToSaved);
+          };
+          this.wavesurfer.on("waveform-ready", seekToSaved);
+          this.locatePlayingTrack();
+        }
+      } catch (e: any) {
+        console.error("读取保存的播放器设置失败");
+        console.error(e);
+        // 加载第一个列表中的第一首歌曲，不播放
+        if (playLists.value.length > 0) {
+          this.track = playLists.value[0].tracks[0] || {};
+          this.wavesurfer.load(this.track.path);
+        }
+      }
+    },
+    handleOnPlay() {
+      this.isPlaying = true;
+      const { ipcRenderer } = require("electron");
+      ipcRenderer.send("changePlayStatus", this.isPlaying);
+      clearInterval(this.trackCurrentTimeInterval);
+      this.trackCurrentTimeInterval = setInterval(
+        this.setTrackCurrentTime,
+        200
+      );
+      // TODO: 改变标题： 歌曲名 - 歌手名 - MMPlayer
+    },
+    handleOnPause() {
+      this.isPlaying = false;
+      const { ipcRenderer } = require("electron");
+      ipcRenderer.send("changePlayStatus", this.isPlaying);
+      clearInterval(this.trackCurrentTimeInterval);
+    },
+    handleOnSeek() {
+      this.setTrackCurrentTime();
+    },
+    handleOnFinish() {
+      if (this.loopMode === "repeatOne") {
+        this.playPause();
+      } else {
+        this.playNext();
+      }
+    },
+    handleOnDestroy() {
+      clearInterval(this.trackCurrentTimeInterval);
+    },
+    handleOnWaveformReady() {
+      this.trackDuration = wavesurferTimeFormat(this.wavesurfer.getDuration());
+      // 设置专辑封面
+      const path = require("path");
+      const { exec } = require("child_process");
+
+      const command =
+        '"' +
+        path.resolve(process.cwd(), "tools", "musicTool.exe") +
+        '" cover "' +
+        this.track.path +
+        '"';
+
+      exec(command, (_error: any, stdout: any, _stderr: any) => {
+        if (stdout !== "") {
+          this.coverArt = stdout;
+        } else {
+          this.coverArt = "./assets/album_black_48dp.svg";
+        }
+      });
+
+      // 设置标题
+      document.title = this.track.title + " - " + this.track.artist;
+    },
+    handleOnInteraction() {
+      if (!this.wavesurfer.isPlaying()) {
+        this.setTrackCurrentTime();
+      }
+    },
+    setTrackCurrentTime() {
+      this.trackCurrentTime = wavesurferTimeFormat(
+        this.wavesurfer.getCurrentTime()
+      );
+    },
+    play(trackIndex: number, playingPlayListIndex: number) {
+      this.wavesurfer.cancelAjax();
+
+      // TODO:
+      const mainStore = useMainStore();
+      const { playLists, showingPlayListIndex } = storeToRefs(mainStore);
+
+      // 记录上一首歌曲
+      if (this.prevTrackArray.length !== 0) {
+        const latestTrack = this.prevTrackArray[this.prevTrackArray.length - 1];
+        if (
+          trackIndex !== latestTrack.trackIndex ||
+          showingPlayListIndex.value !== latestTrack.playListIndex
+        ) {
+          this.prevTrackArray.push({
+            trackIndex: trackIndex,
+            playListIndex: showingPlayListIndex.value,
+          });
+        }
+      } else {
+        this.prevTrackArray.push({
+          trackIndex: trackIndex,
+          playListIndex: showingPlayListIndex.value,
+        });
+      }
+      // console.log(this.prevTrackArray);
+
+      this.playingPlayListIndex = playingPlayListIndex;
+      this.playingTrackIndex = trackIndex;
+
+      this.track =
+        playLists.value[this.playingPlayListIndex].tracks[
+          this.playingTrackIndex
+        ];
+      this.wavesurfer.load(this.track.path);
+      //   this.wavesurfer.play();
+      this.playPause();
+    },
+    playPause() {
+      clearInterval(this.volumeInterval);
+
+      // 如果是刚添加了第一个歌单，点了播放器的播放按钮，则播放第一首歌
+      // TODO:
+      const mainStore = useMainStore();
+      const { playLists, showingPlayListIndex } = storeToRefs(mainStore);
+      if (!this.track.path) {
+        this.track = playLists.value[showingPlayListIndex.value].tracks[0];
+        this.wavesurfer.load(this.track.path);
+      }
+
+      if (this.wavesurfer.isPlaying()) {
+        this.isPlaying = false; // 立即改变按钮
+        this.volumeInterval = setInterval(this.setVolumeToLower, 50);
+      } else {
+        this.wavesurfer.setVolume(0);
+        this.wavesurfer.play();
+        this.volumeInterval = setInterval(this.setVolumeToHigher, 50);
+      }
+    },
+    setVolumeToLower() {
+      if (this.wavesurfer.getVolume() > 0) {
+        this.wavesurfer.setVolume(
+          (this.wavesurfer.getVolume() * 10 - 0.1 * 10) / 10
+        );
+      } else {
+        this.wavesurfer.pause();
+        clearInterval(this.volumeInterval);
+      }
+    },
+    setVolumeToHigher() {
+      if (this.wavesurfer.getVolume() < this.volume / 100) {
+        this.wavesurfer.setVolume(
+          (this.wavesurfer.getVolume() * 10 + 0.1 * 10) / 10
+        );
+      } else {
+        clearInterval(this.volumeInterval);
+      }
+    },
+    playNext() {
+      // TODO:
+      const mainStore = useMainStore();
+      const { playLists, showingPlayListIndex } = storeToRefs(mainStore);
+
+      const tracksLength =
+        playLists.value[showingPlayListIndex.value].tracks.length;
+
+      if (this.loopMode === "shuffle") {
+        this.playingTrackIndex = Math.floor(Math.random() * tracksLength);
+        // this.shuffledTrackIndexArray = shuffleArray(tracksLength);
+      } else {
+        this.playingTrackIndex++;
+        if (this.playingTrackIndex > tracksLength - 1) {
+          this.playingTrackIndex = 0;
+        }
+      }
+
+      this.play(this.playingTrackIndex, this.playingPlayListIndex);
+    },
+    playPrev() {
+      // 是否需要改成：在随机播放模式下，记录上一首播放的歌曲，其他播放模式时就直接播放上一首
+      this.prevTrackArray.pop();
+      if (this.prevTrackArray.length >= 1) {
+        const prevTrack = this.prevTrackArray.pop();
+        // console.log(prevTrack);
+        if (prevTrack) {
+          this.playingTrackIndex = prevTrack.trackIndex;
+          this.playingPlayListIndex = prevTrack.playListIndex;
+          this.play(this.playingTrackIndex, this.playingPlayListIndex);
+        }
+      } else {
+        this.play(this.playingTrackIndex, this.playingPlayListIndex);
+      }
+    },
+    togglePlayMode() {
+      if (this.loopMode === "repeat") {
+        this.loopMode = "repeatOne";
+      } else if (this.loopMode === "repeatOne") {
+        this.loopMode = "shuffle";
+      } else {
+        this.loopMode = "repeat";
+      }
+    },
+    locatePlayingTrack() {
+      const index = this.playingTrackIndex < 8 ? 0 : this.playingTrackIndex - 8;
+      const href = "#track-" + this.playingPlayListIndex + "-" + index;
+
+      // TODO:
+      const mainStore = useMainStore();
+      const { showingPlayListIndex } = storeToRefs(mainStore);
+
+      if (showingPlayListIndex.value !== this.playingPlayListIndex) {
+        showingPlayListIndex.value = this.playingPlayListIndex;
+      }
+      window.location.href = href;
+    },
+  },
+});
+
+// https://github.com/katspaugh/wavesurfer.js/blob/00b9f7e4dcd04f66b5c7a3ae552aa9fb6ed588b4/example/angular-material/wavesurfer.directive.js#L97
+function wavesurferTimeFormat(input: number) {
+  if (!input) {
+    return "00:00";
+  }
+
+  const minutes = Math.floor(input / 60);
+  const seconds = Math.floor(input) % 60;
+
+  return (
+    (minutes < 10 ? "0" : "") +
+    minutes +
+    ":" +
+    (seconds < 10 ? "0" : "") +
+    seconds
+  );
+}
+
+function shuffleArray(length: number) {
+  const array = [] as number[];
+  array.push(Math.floor(Math.random() * (length + 1)));
+  for (let i = 1; i < length; i++) {
+    const latest = array[i - 1];
+    const n = Math.floor(Math.random() * (length + 1));
+    if (n !== latest) {
+      array.push(n);
+    } else {
+      i--;
+    }
+  }
+  return array;
+}
+
+interface PrevTrack {
+  trackIndex: number;
+  playListIndex: number;
+}
