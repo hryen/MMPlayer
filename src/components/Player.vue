@@ -59,40 +59,96 @@ ipcRenderer.on("playNext", (event: any, arg: any) => {
 
     <div id="player-controls">
       <div id="player-controls__buttons">
+        <!-- https://www.iconfinder.com/icons/9026032/repeat_icon -->
         <svg
           v-show="loopMode === 'repeat'"
           @click="playerStore.togglePlayMode()"
           width="20"
           height="20"
           xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 32 32"
+          viewBox="0 0 256 256"
         >
           <title>列表循环</title>
+          <rect fill="none" height="256" width="256" stroke="none" />
+          <polyline
+            fill="none"
+            points="200 88 224 64 200 40"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="16"
+          />
           <path
-            d="M7.68 21.35l4-3.71a1 1 0 1 0-1.36-1.47L8 18.33V12a3.91 3.91 0 0 1 3.86-4h9.71a1 1 0 0 0 0-2H11.86A5.91 5.91 0 0 0 6 12v6.37L3.68 16.17a1 1 0 1 0-1.36 1.47l4 3.71a1 1 0 0 0 .16.1 1 1 0 0 0 .14.09 1 1 0 0 0 .75 0 1 1 0 0 0 .14-.09A1 1 0 0 0 7.68 21.35zM29.68 14.93l-4-3.71a1 1 0 0 0-.16-.1 1 1 0 0 0-.14-.09 1 1 0 0 0-.75 0 1 1 0 0 0-.14.09 1 1 0 0 0-.16.1l-4 3.71a1 1 0 1 0 1.36 1.47L24 14.25v6A3.81 3.81 0 0 1 20.14 24H10.43a1 1 0 1 0 0 2h9.71A5.81 5.81 0 0 0 26 20.26v-6l2.32 2.15a1 1 0 1 0 1.36-1.47z"
-            data-name="Layer 2"
+            d="M32,128A64.1,64.1,0,0,1,96,64H224"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="16"
+          />
+          <polyline
+            fill="none"
+            points="56 168 32 192 56 216"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="16"
+          />
+          <path
+            d="M224,128a64.1,64.1,0,0,1-64,64H32"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="16"
           />
         </svg>
 
+        <!-- https://www.iconfinder.com/icons/9026070/repeat_once_icon -->
         <svg
           v-show="loopMode === 'repeatOne'"
           @click="playerStore.togglePlayMode()"
           width="20"
           height="20"
           xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 32 32"
+          viewBox="0 0 256 256"
         >
           <title>单曲循环</title>
-          <g data-name="Layer 2">
-            <path
-              d="M29.77 15l-3-3.64a1 1 0 0 0-1.54 0l-3 3.64a1 1 0 1 0 1.54 1.27L25 14.79v5.28A4 4 0 0 1 20.89 24H6a1 1 0 0 0 0 2H20.89A6 6 0 0 0 27 20.07V14.79l1.23 1.49A1 1 0 1 0 29.77 15zM6 20.48a1 1 0 0 0 .76-.35l3-3.48a1 1 0 0 0-1.52-1.31L7 16.79v-5A3.93 3.93 0 0 1 11.08 8h14.8a1 1 0 0 0 0-2H11.08A5.93 5.93 0 0 0 5 11.74v5L3.76 15.35a1 1 0 0 0-1.52 1.31l3 3.48A1 1 0 0 0 6 20.48z"
-            />
-            <path
-              d="M17,20a1,1,0,0,0,1-1V13s0,0,0,0a1,1,0,0,0,0-.2,1,1,0,0,0-.05-.19v0a1,1,0,0,0-.09-.11,1,1,0,0,0-.13-.17,2.4,2.4,0,0,0-.32-.2,1,1,0,0,0-.21,0A.94.94,0,0,0,17,12h0a3.06,3.06,0,0,0-.39.09h0l-2,1a1,1,0,0,0,.89,1.79l.55-.28V19A1,1,0,0,0,17,20Z"
-            />
-          </g>
+          <rect fill="none" height="256" width="256" stroke="none" />
+          <polyline
+            fill="none"
+            points="200 88 224 64 200 40"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="16"
+          />
+          <path
+            d="M32,128A64.1,64.1,0,0,1,96,64H224"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="16"
+          />
+          <polyline
+            fill="none"
+            points="56 168 32 192 56 216"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="16"
+          />
+          <path
+            d="M224,128a64.1,64.1,0,0,1-64,64H32"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="16"
+          />
+          <polyline
+            fill="none"
+            points="116 112 132 104 132 152"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="16"
+          />
         </svg>
 
+        <!-- https://www.iconfinder.com/icons/9026085/shuffle_icon -->
         <svg
           v-show="loopMode === 'shuffle'"
           @click="playerStore.togglePlayMode()"
@@ -103,18 +159,45 @@ ipcRenderer.on("playNext", (event: any, arg: any) => {
           x="0"
           y="0"
           version="1.1"
-          viewBox="0 0 29 29"
+          viewBox="0 0 256 256"
           xml:space="preserve"
         >
           <title>随机播放</title>
+          <rect fill="none" height="256" width="256" stroke="none" />
           <path
-            d="M6.843 20H2.5a1 1 0 0 1 0-2h4.343c.79 0 1.563-.32 2.121-.878l6.657-6.657A4.967 4.967 0 0 1 19.157 9H23.5a1 1 0 0 1 0 2h-4.343c-.79 0-1.563.32-2.121.878l-6.657 6.657A4.967 4.967 0 0 1 6.843 20z"
+            d="M32,72H55.1a64,64,0,0,1,52,26.8l41.8,58.4a64,64,0,0,0,52,26.8H232"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="16"
+          />
+          <polyline
+            fill="none"
+            points="208 48 232 72 208 96"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="16"
+          />
+          <polyline
+            fill="none"
+            points="208 160 232 184 208 208"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="16"
           />
           <path
-            d="M23.5 20h-4.343a4.967 4.967 0 01-3.535-1.464l-6.657-6.657A3.02 3.02 0 006.843 11H2.5a1 1 0 010-2h4.343c1.335 0 2.591.52 3.535 1.464l6.657 6.657a3.02 3.02 0 002.122.879H23.5a1 1 0 010 2zM21.5 12.412V7.588c0-.368.401-.596.717-.408l4.052 2.412a.474.474 0 010 .815l-4.052 2.412a.474.474 0 01-.717-.407z"
+            d="M147.7,100.5l1.2-1.7a64,64,0,0,1,52-26.8H232"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="16"
           />
           <path
-            d="M21.5 21.412v-4.823c0-.368.401-.596.717-.408l4.052 2.412a.474.474 0 0 1 0 .815l-4.052 2.412a.475.475 0 0 1-.717-.408z"
+            d="M32,184H55.1a64,64,0,0,0,52-26.8l1.2-1.7"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="16"
           />
         </svg>
 
@@ -127,6 +210,7 @@ ipcRenderer.on("playNext", (event: any, arg: any) => {
         >
           <title>上一首</title>
           <path
+            stroke="none"
             d="M13.75 13.0351C13.75 13.8459 12.8357 14.3196 12.1733 13.852L5.04034 8.81698C4.47592 8.41857 4.47592 7.58146 5.04034 7.18305L12.1733 2.14801C12.8357 1.68042 13.75 2.15416 13.75 2.96498L13.75 13.0351zM1.75 13.25C1.75 13.6642 2.08579 14 2.5 14 2.91421 14 3.25 13.6642 3.25 13.25L3.25 2.75C3.25 2.33579 2.91421 2 2.5 2 2.08579 2 1.75 2.33579 1.75 2.75V13.25z"
           />
         </svg>
@@ -141,6 +225,7 @@ ipcRenderer.on("playNext", (event: any, arg: any) => {
         >
           <title>播放</title>
           <path
+            stroke="none"
             d="M7 17.259V6.74104C7 5.96925 7.83721 5.48838 8.50387 5.87726L17.5192 11.1362C18.1807 11.5221 18.1807 12.4779 17.5192 12.8638L8.50387 18.1227C7.83721 18.5116 7 18.0308 7 17.259Z"
           />
         </svg>
@@ -154,6 +239,7 @@ ipcRenderer.on("playNext", (event: any, arg: any) => {
         >
           <title>暂停</title>
           <path
+            stroke="none"
             d="M8 5C6.89543 5 6 5.89543 6 7V17C6 18.1046 6.89543 19 8 19 9.10457 19 10 18.1046 10 17V7C10 5.89543 9.10457 5 8 5zM16 5C14.8954 5 14 5.89543 14 7V17C14 18.1046 14.8954 19 16 19 17.1046 19 18 18.1046 18 17V7C18 5.89543 17.1046 5 16 5z"
           />
         </svg>
@@ -167,6 +253,7 @@ ipcRenderer.on("playNext", (event: any, arg: any) => {
         >
           <title>下一首</title>
           <path
+            stroke="none"
             d="M2 2.96495C2 2.15413 2.91427 1.68039 3.57668 2.14798L10.7097 7.18302C11.2741 7.58143 11.2741 8.41854 10.7097 8.81695L3.57668 13.852C2.91427 14.3196 2 13.8458 2 13.035V2.96495zM14 2.75C14 2.33579 13.6642 2 13.25 2 12.8358 2 12.5 2.33579 12.5 2.75V13.25C12.5 13.6642 12.8358 14 13.25 14 13.6642 14 14 13.6642 14 13.25V2.75z"
           />
         </svg>
@@ -284,10 +371,12 @@ ipcRenderer.on("playNext", (event: any, arg: any) => {
 #player-controls__buttons svg {
   cursor: pointer;
   fill: #4080ff;
+  stroke: #4080ff;
 }
 
 #player-controls__buttons svg:hover {
   fill: #165dff;
+  stroke: #165dff;
 }
 
 #player-controls__bar {
