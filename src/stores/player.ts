@@ -20,6 +20,7 @@ export const usePlayerStore = defineStore("player", {
 
     volumeInterval: null as any,
     trackCurrentTimeInterval: null as any,
+    isFullPage: false as boolean, // 显示歌词
   }),
   actions: {
     init() {
@@ -176,6 +177,50 @@ export const usePlayerStore = defineStore("player", {
 
       // 设置标题
       document.title = this.track.title + " - " + this.track.artist;
+
+      // 读取歌词
+      const lrcArray = [];
+      const iconvlite = require("iconv-lite");
+      const fs = require("fs");
+
+      let lrcPath = this.track.path;
+      lrcPath = lrcPath.substring(0, lrcPath.lastIndexOf(".")) + ".lrc";
+      lrcPath = lrcPath.replaceAll("\\", "/");
+      // console.log(lrcPath);
+
+      let lrcContent = "";
+      try {
+        const data = fs.readFileSync(lrcPath);
+        lrcContent = iconvlite.decode(data, "gbk");
+        // console.log(lrcContent);
+      } catch (err) {
+        this.track.lyricsList = [{ time: "0", text: "暂无歌词" }];
+        // console.error(err);
+        return;
+      }
+
+      const lrc = lrcContent.split("\n");
+      for (let i = 0; i < lrc.length; i++) {
+        let l = lrc[i];
+        if (l.match(/^\[.*?](\r)?$/)) {
+          continue;
+        }
+
+        let timeMatch = l.match(/\[(\d{2}):(\d{2})(\.|:)(\d{2})]/);
+        if (timeMatch) {
+          let min = parseInt(timeMatch[1]);
+          let sec = parseInt(timeMatch[2]);
+          let ms = parseInt(timeMatch[4]);
+          const time = min * 60 + sec + ms / 1000;
+          let text = l.replace(/\[(\d{2}):(\d{2})(\.|:)(\d{2})]/, "");
+          lrcArray.push({
+            time: time + "",
+            text: text.replaceAll("\r", ""),
+          });
+        }
+      }
+      this.track.lyricsList = lrcArray;
+      // console.log(this.track);
     },
     handleOnInteraction() {
       if (!this.wavesurfer.isPlaying()) {

@@ -11,6 +11,7 @@ const {
   trackDuration,
   coverArt,
   loopMode,
+  isFullPage,
 } = storeToRefs(playerStore);
 
 onMounted(() => {
@@ -41,6 +42,7 @@ ipcRenderer.on("playNext", (event: any, arg: any) => {
             : 'data:image/png;base64,' + coverArt
         "
         alt="Cover"
+        @click="isFullPage = !isFullPage"
       />
     </div>
 
@@ -320,6 +322,7 @@ ipcRenderer.on("playNext", (event: any, arg: any) => {
   width: 48px;
   height: 48px;
   border-radius: 4px;
+  cursor: pointer;
 }
 
 #player-info {
