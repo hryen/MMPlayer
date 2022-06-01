@@ -14,11 +14,17 @@ ipcRenderer.on("maximize-reply", (_event: String, arg: boolean) => {
   isMaximized.value = arg;
 });
 
+const playerStore = usePlayerStore();
+const {
+  wavesurfer,
+  playingPlayListIndex,
+  playingTrackIndex,
+  loopMode,
+  isFullPage,
+} = storeToRefs(playerStore);
+
 function quit() {
   // 退出前先保存当前播放的歌曲、时间、歌曲列表、播放模式
-  const playerStore = usePlayerStore();
-  const { wavesurfer, playingPlayListIndex, playingTrackIndex, loopMode } =
-    storeToRefs(playerStore);
   // console.log(wavesurfer.value, playingPlayListIndex.value, playingTrackIndex.value, loopMode.value);
   const setting: PlayerSetting = {
     playingPlayListIndex: playingPlayListIndex.value,
@@ -53,7 +59,7 @@ function quit() {
         <span>MMPlayer</span>
       </div>
     </div>
-    <div id="app-header__right">
+    <div id="app-header__right" :style="isFullPage ? 'background-color: #fbfcfe;' : ''">
       <!-- <div id="app-header__right_search">
         <input type="text" placeholder="Search" />
       </div> -->
