@@ -522,6 +522,7 @@ export const usePlayerStore = defineStore("player", {
       }
       this.track.lyricsList = lrcArray;
       this.nextLrcIndex = 1;
+      this.goToLyricsLine(0);
 
       console.log(
         "获取歌曲封面和歌词完成, 用时",
