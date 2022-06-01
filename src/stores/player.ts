@@ -21,6 +21,8 @@ export const usePlayerStore = defineStore("player", {
     volumeInterval: null as any,
     trackCurrentTimeInterval: null as any,
     isFullPage: false as boolean, // 显示歌词
+    lrcInterval: null as any,
+    nextLrcIndex: 1 as number,
   }),
   actions: {
     init() {
@@ -114,6 +116,8 @@ export const usePlayerStore = defineStore("player", {
           this.wavesurfer.on("waveform-ready", seekToSaved);
           this.locatePlayingTrack();
         }
+
+        this.getAndSetTrackInfo();
       } catch (e: any) {
         console.error("读取保存的播放器设置失败");
         console.error(e);
@@ -121,6 +125,7 @@ export const usePlayerStore = defineStore("player", {
         if (playLists.value.length > 0) {
           this.track = playLists.value[0].tracks[0] || {};
           this.wavesurfer.load(this.track.path);
+          this.getAndSetTrackInfo();
         }
       }
     },
@@ -134,93 +139,108 @@ export const usePlayerStore = defineStore("player", {
         200
       );
       // TODO: 改变标题： 歌曲名 - 歌手名 - MMPlayer
+
+      this.startLrcInterval();
     },
     handleOnPause() {
       this.isPlaying = false;
       const { ipcRenderer } = require("electron");
       ipcRenderer.send("changePlayStatus", this.isPlaying);
       clearInterval(this.trackCurrentTimeInterval);
+      clearInterval(this.lrcInterval);
     },
     handleOnSeek() {
       this.setTrackCurrentTime();
+      this.seekLrc();
     },
     handleOnFinish() {
       if (this.loopMode === "repeatOne") {
         this.playPause();
       } else {
-        this.playNext();
+        // this.playNext();
+        const _this = this;
+        setTimeout(function () {
+          clearInterval(_this.lrcInterval);
+          _this.playNext();
+        }, 1000);
       }
     },
     handleOnDestroy() {
       clearInterval(this.trackCurrentTimeInterval);
+      clearInterval(this.lrcInterval);
     },
     handleOnWaveformReady() {
+      // console.log("waveform-ready");
       this.trackDuration = wavesurferTimeFormat(this.wavesurfer.getDuration());
-      // 设置专辑封面
-      const path = require("path");
-      const { exec } = require("child_process");
+      // // 设置专辑封面
+      // const path = require("path");
+      // const { exec } = require("child_process");
 
-      const command =
-        '"' +
-        path.resolve(process.cwd(), "tools", "musicTool.exe") +
-        '" cover "' +
-        this.track.path +
-        '"';
+      // const command =
+      //   '"' +
+      //   path.resolve(process.cwd(), "tools", "musicTool.exe") +
+      //   '" cover "' +
+      //   this.track.path +
+      //   '"';
 
-      exec(command, (_error: any, stdout: any, _stderr: any) => {
-        if (stdout !== "") {
-          this.coverArt = stdout;
-        } else {
-          this.coverArt = "./assets/album_black_48dp.svg";
-        }
-      });
+      // exec(command, (_error: any, stdout: any, _stderr: any) => {
+      //   if (stdout !== "") {
+      //     this.coverArt = stdout;
+      //   } else {
+      //     this.coverArt = "./assets/album_black_48dp.svg";
+      //   }
+      // });
 
-      // 设置标题
-      document.title = this.track.title + " - " + this.track.artist;
+      // // 设置标题
+      // document.title = this.track.title + " - " + this.track.artist;
 
-      // 读取歌词
-      const lrcArray = [];
-      const iconvlite = require("iconv-lite");
-      const fs = require("fs");
+      // // console.log(this.track);
 
-      let lrcPath = this.track.path;
-      lrcPath = lrcPath.substring(0, lrcPath.lastIndexOf(".")) + ".lrc";
-      lrcPath = lrcPath.replaceAll("\\", "/");
-      // console.log(lrcPath);
+      // // 读取歌词
+      // const lrcArray = [];
+      // const iconvlite = require("iconv-lite");
+      // const fs = require("fs");
 
-      let lrcContent = "";
-      try {
-        const data = fs.readFileSync(lrcPath);
-        lrcContent = iconvlite.decode(data, "gbk");
-        // console.log(lrcContent);
-      } catch (err) {
-        this.track.lyricsList = [{ time: "0", text: "暂无歌词" }];
-        // console.error(err);
-        return;
-      }
+      // let lrcPath = this.track.path;
+      // lrcPath = lrcPath.substring(0, lrcPath.lastIndexOf(".")) + ".lrc";
+      // lrcPath = lrcPath.replaceAll("\\", "/");
+      // // console.log(lrcPath);
 
-      const lrc = lrcContent.split("\n");
-      for (let i = 0; i < lrc.length; i++) {
-        let l = lrc[i];
-        if (l.match(/^\[.*?](\r)?$/)) {
-          continue;
-        }
+      // let lrcContent = "";
+      // try {
+      //   const data = fs.readFileSync(lrcPath);
+      //   lrcContent = iconvlite.decode(data, "gbk");
+      //   // console.log(lrcContent);
+      // } catch (err) {
+      //   this.track.lyricsList = [{ time: "0", text: "暂无歌词" }];
+      //   this.nextLrcIndex = 1;
+      //   // console.error(err);
+      //   return;
+      // }
 
-        let timeMatch = l.match(/\[(\d{2}):(\d{2})(\.|:)(\d{2})]/);
-        if (timeMatch) {
-          let min = parseInt(timeMatch[1]);
-          let sec = parseInt(timeMatch[2]);
-          let ms = parseInt(timeMatch[4]);
-          const time = min * 60 + sec + ms / 1000;
-          let text = l.replace(/\[(\d{2}):(\d{2})(\.|:)(\d{2})]/, "");
-          lrcArray.push({
-            time: time + "",
-            text: text.replaceAll("\r", ""),
-          });
-        }
-      }
-      this.track.lyricsList = lrcArray;
-      // console.log(this.track);
+      // const lrc = lrcContent.split("\n");
+      // for (let i = 0; i < lrc.length; i++) {
+      //   let l = lrc[i];
+      //   if (l.match(/^\[.*?](\r)?$/)) {
+      //     continue;
+      //   }
+
+      //   let timeMatch = l.match(/\[(\d{2}):(\d{2})(\.|:)(\d{2})]/);
+      //   if (timeMatch) {
+      //     let min = parseInt(timeMatch[1]);
+      //     let sec = parseInt(timeMatch[2]);
+      //     let ms = parseInt(timeMatch[4]);
+      //     const time = min * 60 + sec + ms / 1000;
+      //     let text = l.replace(/\[(\d{2}):(\d{2})(\.|:)(\d{2})]/, "");
+      //     lrcArray.push({
+      //       time: time + "",
+      //       text: text.replaceAll("\r", ""),
+      //     });
+      //   }
+      // }
+      // this.track.lyricsList = lrcArray;
+      // this.nextLrcIndex = 1;
+      // this.startLrcInterval();
     },
     handleOnInteraction() {
       if (!this.wavesurfer.isPlaying()) {
@@ -233,6 +253,7 @@ export const usePlayerStore = defineStore("player", {
       );
     },
     play(trackIndex: number, playingPlayListIndex: number) {
+      // console.log("play");
       this.wavesurfer.cancelAjax();
 
       // TODO:
@@ -269,6 +290,9 @@ export const usePlayerStore = defineStore("player", {
       this.wavesurfer.load(this.track.path);
       //   this.wavesurfer.play();
       this.playPause();
+
+      // 设置歌曲信息
+      this.getAndSetTrackInfo();
     },
     playPause() {
       clearInterval(this.volumeInterval);
@@ -366,6 +390,144 @@ export const usePlayerStore = defineStore("player", {
         showingPlayListIndex.value = this.playingPlayListIndex;
       }
       window.location.href = href;
+    },
+
+    startLrcInterval() {
+      const lrcArray = this.track.lyricsList;
+      if (!lrcArray || lrcArray.length <= 1) {
+        return;
+      }
+
+      const _this = this;
+      this.lrcInterval = setInterval(function () {
+        const currentTime = _this.wavesurfer.getCurrentTime();
+        const l = lrcArray[_this.nextLrcIndex];
+        if (_this.nextLrcIndex === lrcArray.length) {
+          return;
+        }
+        if (currentTime >= l.time) {
+          _this.goToLyricsLine(_this.nextLrcIndex);
+
+          _this.nextLrcIndex++;
+        }
+      }, 300);
+    },
+
+    seekLrc() {
+      const lyricsList = this.track.lyricsList;
+      if (!lyricsList || lyricsList.length <= 1) {
+        return;
+      }
+
+      const currentTime = parseInt(this.wavesurfer.getCurrentTime());
+      if (currentTime > parseFloat(lyricsList[lyricsList.length - 1].time)) {
+        this.nextLrcIndex = lyricsList.length;
+      } else {
+        for (let i = 0; i < lyricsList.length; i++) {
+          if (parseFloat(lyricsList[i].time) > currentTime) {
+            this.nextLrcIndex = i;
+            break;
+          }
+        }
+      }
+
+      this.goToLyricsLine(this.nextLrcIndex);
+    },
+
+    goToLyricsLine(line: number) {
+      if (!this.isFullPage) {
+        return;
+      }
+
+      if (line >= 7) {
+        line -= 7;
+      } else {
+        line = 0;
+      }
+      document.getElementById("lyrics-container").scrollTop =
+        document.getElementById("lyrics-line" + line).offsetTop +
+        document.getElementById("lyrics-line" + line).offsetParent.offsetTop -
+        40; // 40 如果不减，会超出窗口，跑到上面去，看不见了，40是一行的高度
+    },
+
+    // 获取歌曲封面、歌词，设置封面、程序标题、歌词
+    getAndSetTrackInfo() {
+      const start = new Date().getTime();
+
+      // 设置专辑封面
+      const path = require("path");
+      const { exec } = require("child_process");
+
+      const command =
+        '"' +
+        path.resolve(process.cwd(), "tools", "musicTool.exe") +
+        '" cover "' +
+        this.track.path +
+        '"';
+
+      exec(command, (_error: any, stdout: any, _stderr: any) => {
+        if (stdout !== "") {
+          this.coverArt = stdout;
+        } else {
+          this.coverArt = "./assets/album_black_48dp.svg";
+        }
+      });
+
+      // 设置标题
+      document.title = this.track.title + " - " + this.track.artist;
+
+      // console.log(this.track);
+
+      // 读取歌词
+      const lrcArray = [];
+      const iconvlite = require("iconv-lite");
+      const fs = require("fs");
+
+      let lrcPath = this.track.path;
+      lrcPath = lrcPath.substring(0, lrcPath.lastIndexOf(".")) + ".lrc";
+      lrcPath = lrcPath.replaceAll("\\", "/");
+      // console.log(lrcPath);
+
+      let lrcContent = "";
+      try {
+        const data = fs.readFileSync(lrcPath);
+        lrcContent = iconvlite.decode(data, "gbk");
+        // console.log(lrcContent);
+      } catch (err) {
+        this.track.lyricsList = [{ time: "0", text: "暂无歌词" }];
+        this.nextLrcIndex = 1;
+        // console.error(err);
+        return;
+      }
+
+      const lrc = lrcContent.split("\n");
+      for (let i = 0; i < lrc.length; i++) {
+        let l = lrc[i];
+        if (l.match(/^\[.*?](\r)?$/)) {
+          continue;
+        }
+
+        let timeMatch = l.match(/\[(\d{2}):(\d{2})(\.|:)(\d{2})]/);
+        if (timeMatch) {
+          let min = parseInt(timeMatch[1]);
+          let sec = parseInt(timeMatch[2]);
+          let ms = parseInt(timeMatch[4]);
+          const time = min * 60 + sec + ms / 1000;
+          let text = l.replace(/\[(\d{2}):(\d{2})(\.|:)(\d{2})]/, "");
+          lrcArray.push({
+            time: time + "",
+            text: text.replaceAll("\r", ""),
+          });
+        }
+      }
+      this.track.lyricsList = lrcArray;
+      this.nextLrcIndex = 1;
+
+      console.log(
+        "获取歌曲封面和歌词完成, 用时",
+        new Date().getTime() - start,
+        "ms"
+      );
     },
   },
 });

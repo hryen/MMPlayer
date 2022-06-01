@@ -3,6 +3,7 @@ import { usePlayerStore } from "@/stores/player";
 import { storeToRefs } from "pinia";
 const playerStore = usePlayerStore();
 const {
+  wavesurfer,
   track,
   isPlaying,
   trackCurrentTime,
@@ -10,12 +11,10 @@ const {
   coverArt,
   loopMode,
   isFullPage,
+  lrcInterval,
+  nextLrcIndex,
 } = storeToRefs(playerStore);
 
-
-function nextLine() {
-  document.getElementById("lyrics-container").scrollTop += 36;
-}
 </script>
 <template>
   <div id="full-page-container" v-show="isFullPage">
@@ -30,7 +29,7 @@ function nextLine() {
         alt="Cover"
       />
       <div id="track-title">{{ track.title }}</div>
-      <div id="track-artist" @click="nextLine">{{ track.artist }}</div>
+      <div id="track-artist">{{ track.artist }}</div>
     </div>
     <div
       id="lyrics-container"
@@ -40,7 +39,10 @@ function nextLine() {
           : ''
       "
     >
-      <p v-for="item in track.lyricsList">{{ item.text }}</p>
+      <template v-for="(item, index) in track.lyricsList">
+        <!-- 一页能显示15行歌词 -->
+        <p :id="'lyrics-line' + index" :class="{highlight: nextLrcIndex - 1 === index}">{{ item.text }}</p>
+      </template>
     </div>
   </div>
 </template>
@@ -122,6 +124,11 @@ function nextLine() {
 #lyrics-container p {
   line-height: 20px;
   margin: 0;
-  padding: 8px 30px;
+  padding: 10px 30px;
+  font-size: 16px;
+}
+#lyrics-container p.highlight {
+  font-weight: bold;
+  transform: scale(1.1);
 }
 </style>
