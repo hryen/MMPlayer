@@ -27,8 +27,8 @@ const {
         "
         alt="Cover"
       />
-      <div id="track-title">{{ track.title }}</div>
-      <div id="track-artist">{{ track.artist }}</div>
+      <div id="track-title" :title="track.title">{{ track.title }}</div>
+      <div id="track-artist" :title="track.artist">{{ track.artist }}</div>
     </div>
     <div
       id="lyrics-container"
@@ -111,6 +111,10 @@ const {
 
   overflow-y: scroll;
   scroll-behavior: smooth;
+
+  overflow-x: hidden;
+
+  user-select: text;
 }
 #lyrics-container::-webkit-scrollbar {
   width: 10px;

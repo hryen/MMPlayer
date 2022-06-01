@@ -12,7 +12,7 @@ import Lyrics from "@/components/Lyrics.vue";
   <div id="main">
     <PlayList />
     <TrackList />
-    <!-- <Lyrics /> -->
+    <Lyrics />
   </div>
 
   <Player />
