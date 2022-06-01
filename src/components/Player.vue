@@ -203,6 +203,7 @@ ipcRenderer.on("playNext", (event: any, arg: any) => {
           />
         </svg>
 
+        <!-- https://iconscout.com/icon/previous-2653729 -->
         <svg
           @click="playerStore.playPrev()"
           xmlns="http://www.w3.org/2000/svg"
@@ -217,6 +218,7 @@ ipcRenderer.on("playNext", (event: any, arg: any) => {
           />
         </svg>
 
+        <!-- https://iconscout.com/icon/play-1912208 -->
         <svg
           v-show="!isPlaying"
           @click="playerStore.playPause()"
@@ -231,6 +233,8 @@ ipcRenderer.on("playNext", (event: any, arg: any) => {
             d="M7 17.259V6.74104C7 5.96925 7.83721 5.48838 8.50387 5.87726L17.5192 11.1362C18.1807 11.5221 18.1807 12.4779 17.5192 12.8638L8.50387 18.1227C7.83721 18.5116 7 18.0308 7 17.259Z"
           />
         </svg>
+
+        <!-- https://iconscout.com/icon/pause-1912210 -->
         <svg
           v-show="isPlaying"
           @click="playerStore.playPause()"
@@ -246,6 +250,7 @@ ipcRenderer.on("playNext", (event: any, arg: any) => {
           />
         </svg>
 
+        <!-- https://iconscout.com/icon/next-2653752 -->
         <svg
           @click="playerStore.playNext()"
           xmlns="http://www.w3.org/2000/svg"
@@ -286,13 +291,6 @@ ipcRenderer.on("playNext", (event: any, arg: any) => {
         <div id="player-controls__total-time">{{ trackDuration }}</div>
       </div>
     </div>
-
-    <!-- 歌词滚动使用margin-top: -xxxpx，js实现，比如行高是30，margin-top要从-1一直到-30 -->
-    <!-- <div id="player-lyrics">
-        <div id="player-lyrics__prev"></div>
-        <div id="player-lyrics__curr">暂无歌词</div>
-        <div id="player-lyrics__next"></div>
-      </div> -->
   </div>
 </template>
 
@@ -443,31 +441,5 @@ ipcRenderer.on("playNext", (event: any, arg: any) => {
   color: #999;
   width: 30px;
   visibility: hidden;
-} */
-
-/* lyrics */
-/* #player-lyrics {
-  padding: 0 10px;
-  width: 24%;
-  height: 90px;
-  display: flex;
-  flex-flow: column;
-  justify-content: center;
-}
-#player-lyrics__prev,
-#player-lyrics__curr,
-#player-lyrics__next {
-  width: 100%;
-  font-size: 12px;
-  line-height: 161.8%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  box-sizing: border-box;
-  text-align: center;
-}
-#player-lyrics__curr {
-  font-weight: bold;
-  font-size: 14px;
 } */
 </style>
