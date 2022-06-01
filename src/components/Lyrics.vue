@@ -14,7 +14,6 @@ const {
   lrcInterval,
   nextLrcIndex,
 } = storeToRefs(playerStore);
-
 </script>
 <template>
   <div id="full-page-container" v-show="isFullPage">
@@ -41,7 +40,12 @@ const {
     >
       <template v-for="(item, index) in track.lyricsList">
         <!-- 一页能显示15行歌词 -->
-        <p :id="'lyrics-line' + index" :class="{highlight: nextLrcIndex - 1 === index}">{{ item.text }}</p>
+        <p
+          :id="'lyrics-line' + index"
+          :class="{ highlight: nextLrcIndex - 1 === index }"
+        >
+          {{ item.text }}
+        </p>
       </template>
     </div>
   </div>
@@ -126,6 +130,9 @@ const {
   margin: 0;
   padding: 10px 30px;
   font-size: 16px;
+
+  text-align: center;
+  width: 90%;
 }
 #lyrics-container p.highlight {
   font-weight: bold;
