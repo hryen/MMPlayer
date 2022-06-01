@@ -39,7 +39,7 @@ const {
       "
     >
       <template v-for="(item, index) in track.lyricsList">
-        <!-- 一页能显示15行歌词 -->
+        <!-- 显示11行歌词 -->
         <p
           :id="'lyrics-line' + index"
           :class="{ highlight: nextLrcIndex - 1 === index }"
@@ -63,8 +63,8 @@ const {
 
   display: flex;
   flex-direction: row;
-  align-content: space-around;
   justify-content: space-around;
+  align-items: center;
 }
 
 #track-info-container {
@@ -102,6 +102,7 @@ const {
 
 #lyrics-container {
   width: 60%;
+  height: 440px;
 
   display: flex;
   flex-direction: column;

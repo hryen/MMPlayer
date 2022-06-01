@@ -439,15 +439,15 @@ export const usePlayerStore = defineStore("player", {
         return;
       }
 
-      if (line >= 7) {
-        line -= 7;
+      if (line >= 5) {
+        line -= 5;
       } else {
         line = 0;
       }
       document.getElementById("lyrics-container").scrollTop =
         document.getElementById("lyrics-line" + line).offsetTop +
         document.getElementById("lyrics-line" + line).offsetParent.offsetTop -
-        40; // 40 如果不减，会超出窗口，跑到上面去，看不见了，40是一行的高度
+        120; // 40是一行的高度，减去3行的高度
     },
 
     // 获取歌曲封面、歌词，设置封面、程序标题、歌词
