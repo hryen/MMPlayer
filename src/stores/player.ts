@@ -2,6 +2,7 @@ import { defineStore, storeToRefs } from "pinia";
 import { Track } from "@/models/track";
 import { useMainStore } from "@/stores/main";
 import { PlayerSetting } from "@/models/playerSetting";
+import { getPeakData } from "@/utils/musicTool";
 
 export const usePlayerStore = defineStore("player", {
   state: () => ({
@@ -124,7 +125,17 @@ export const usePlayerStore = defineStore("player", {
         // 加载第一个列表中的第一首歌曲，不播放
         if (playLists.value.length > 0) {
           this.track = playLists.value[0].tracks[0] || {};
-          this.wavesurfer.load(this.track.path);
+
+          try {
+            const data = getPeakData(
+              this.playingPlayListIndex,
+              this.playingTrackIndex
+            );
+            this.wavesurfer.load(this.track.path, data);
+          } catch (err) {
+            this.wavesurfer.load(this.track.path);
+          }
+
           this.getAndSetTrackInfo();
         }
       }
@@ -170,6 +181,32 @@ export const usePlayerStore = defineStore("player", {
       clearInterval(this.lrcInterval);
     },
     handleOnWaveformReady() {
+      // 生成 peaks 数据
+      this.wavesurfer.exportPCM(1024, 10000, true, 0).then((data: any) => {
+        const path = require("path");
+        const fs = require("fs");
+
+        const peakFile = path.resolve(
+          process.cwd(),
+          "cache",
+          "peak_data",
+          this.playingPlayListIndex + "",
+          this.playingTrackIndex + ".json"
+        );
+
+        // 如果文件夹不存在，则创建
+        const dir = path.dirname(peakFile);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+        // 将 data 写入文件
+        fs.writeFile(peakFile, JSON.stringify(data), (err: any) => {
+          if (err) {
+            console.error("保存 peek data 失败", err);
+          }
+        });
+      });
+
       // console.log("waveform-ready");
       this.trackDuration = wavesurferTimeFormat(this.wavesurfer.getDuration());
       // // 设置专辑封面
@@ -287,7 +324,17 @@ export const usePlayerStore = defineStore("player", {
         playLists.value[this.playingPlayListIndex].tracks[
           this.playingTrackIndex
         ];
-      this.wavesurfer.load(this.track.path);
+      // this.wavesurfer.load(this.track.path);
+
+      try {
+        const data = getPeakData(
+          this.playingPlayListIndex,
+          this.playingTrackIndex
+        );
+        this.wavesurfer.load(this.track.path, data);
+      } catch (err) {
+        this.wavesurfer.load(this.track.path);
+      }
       //   this.wavesurfer.play();
       this.playPause();
 
@@ -452,8 +499,6 @@ export const usePlayerStore = defineStore("player", {
 
     // 获取歌曲封面、歌词，设置封面、程序标题、歌词
     getAndSetTrackInfo() {
-      const start = new Date().getTime();
-
       // 设置专辑封面
       const path = require("path");
       const { exec } = require("child_process");
@@ -523,12 +568,6 @@ export const usePlayerStore = defineStore("player", {
       this.track.lyricsList = lrcArray;
       this.nextLrcIndex = 1;
       this.goToLyricsLine(0);
-
-      console.log(
-        "获取歌曲封面和歌词完成, 用时",
-        new Date().getTime() - start,
-        "ms"
-      );
     },
   },
 });

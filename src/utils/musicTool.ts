@@ -36,3 +36,16 @@ export function walkDirectory(dirPath: string): Promise<Track[]> {
     });
   });
 }
+
+export function getPeakData(playListId: number, trackId: number): string {
+  const path = require("path");
+  const fs = require("fs");
+  const peekFile = path.resolve(
+    process.cwd(),
+    "cache",
+    "peak_data",
+    playListId+"",
+    trackId + ".json"
+  );
+  return JSON.parse(fs.readFileSync(peekFile));
+}

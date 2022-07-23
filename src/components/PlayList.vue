@@ -34,11 +34,23 @@ function refreshPlayList() {
     const tracks = await walkDirectory(playList.path);
     playList.tracks = tracks;
   });
-  // TODO: 提示刷新完成
-  console.log("刷新歌单完成");
 
   // 保存歌单列表
   writePlayListToFile(playListsFile);
+
+  // 删除缓存
+  fs.rm(
+    path.resolve(process.cwd(), "cache", "peak_data"),
+    { recursive: true },
+    (err: any) => {
+      if (err) {
+        console.error("删除 peak data 缓存时出错", err);
+      }
+    }
+  );
+  
+  // TODO: 提示刷新完成
+  console.log("刷新歌单完成");
 }
 
 // 添加歌单
@@ -58,7 +70,6 @@ ipcRenderer.on("dialogOpenDirectory-reply", async (event: any, arg: any) => {
     playLists.value[playLists.value.length - 1].tracks = await walkDirectory(
       playList.path
     );
-    console.log(1);
 
     // 如果添加后只有一个歌单，则自动选中
     if (playLists.value.length === 1) {
@@ -112,10 +123,23 @@ ipcRenderer.on("dialogDeletePlayList-reply", (event: any, arg: any) => {
         showingPlayListIndex.value--;
       }
     }
-    
+
     playLists.value.splice(willPlayListIndex, 1);
     writePlayListToFile(playListsFile);
   }
+
+  // 删除缓存
+  const peakCacheDir = path.resolve(
+    process.cwd(),
+    "cache",
+    "peak_data",
+    willPlayListIndex + ""
+  );
+  fs.rm(peakCacheDir, { recursive: true }, (err: any) => {
+    if (err) {
+      console.error("删除 peak data 缓存时出错", err);
+    }
+  });
 });
 
 // 将歌单信息保存到文件中
@@ -127,7 +151,7 @@ function writePlayListToFile(path: string) {
       console.error("保存播放列表失败", err);
       return;
     }
-    console.log("保存成功");
+    console.log("保存播放列表成功");
   });
 }
 
