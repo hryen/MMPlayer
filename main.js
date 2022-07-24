@@ -36,7 +36,6 @@ function createMainWindow() {
 Menu.setApplicationMenu(null);
 
 // 设置任务栏缩略图按钮
-// TODO: 可以再加个设置播放模式的按钮
 function setThumbarButtons(isPlaying) {
   mainWindow.setThumbarButtons([
     {
