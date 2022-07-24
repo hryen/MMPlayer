@@ -7,14 +7,10 @@
   "license": "MIT",
   "main": "main.js",
   "scripts": {
-    "release": "vite build && electron-builder",
-    "test": "vite build && electron .",
-    "comment": "vue-tsc --noEmit && vite build && electron-builder",
-    "dist": "vite build && electron-builder",
-    "start": "electron .",
-    "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "dev": "vite build && electron .",
+    "build": "vite build && electron-builder",
+    "vite:dev": "vite",
+    "vite:build": "vue-tsc --noEmit && vite build"
   },
   "build": {
     "appId": "com.hryen.mmplayer",
