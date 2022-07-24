@@ -8,7 +8,7 @@
   "main": "main.js",
   "scripts": {
     "dev": "vite build && electron .",
-    "build": "vite build && electron-builder",
+    "release": "vite build && electron-builder",
     "vite:dev": "vite",
     "vite:build": "vue-tsc --noEmit && vite build"
   },
