@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
 import { usePlayerStore } from "@/stores/player";
 import { storeToRefs } from "pinia";
 
@@ -13,10 +12,6 @@ const {
   loopMode,
   isFullPage,
 } = storeToRefs(playerStore);
-
-onMounted(() => {
-  playerStore.init();
-});
 
 // 监听任务栏缩略图按钮事件
 const { ipcRenderer } = require("electron");

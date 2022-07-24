@@ -69,7 +69,7 @@ app.whenReady().then(() => {
 
   mainWindow.once("ready-to-show", () => {
     mainWindow.show();
-
+    mainWindow.webContents.send("rendered");
     setThumbarButtons(false);
   });
 
