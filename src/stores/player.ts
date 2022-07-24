@@ -113,9 +113,10 @@ export const usePlayerStore = defineStore("player", {
               playerSetting.trackCurrentTime / that.wavesurfer.getDuration()
             );
             that.wavesurfer.un("waveform-ready", seekToSaved);
+
+            that.locatePlayingTrack();
           };
           this.wavesurfer.on("waveform-ready", seekToSaved);
-          this.locatePlayingTrack();
         }
 
         this.getAndSetTrackInfo();
