@@ -10,6 +10,7 @@ const isMaximized = ref(false);
 function maximize() {
   ipcRenderer.send("maximize");
 }
+
 ipcRenderer.on("maximize-reply", (_event: String, arg: boolean) => {
   isMaximized.value = arg;
 });
@@ -35,17 +36,16 @@ function quit() {
   // console.log(JSON.stringify(setting));
   const path = require("path");
   const fs = require("fs");
-  fs.writeFileSync(
-    path.resolve(process.cwd(), "playerSetting.json"),
-    JSON.stringify(setting),
-    (err: any) => {
-      if (err) {
-        console.error("保存播放器设置失败", err);
-        return;
-      }
-      console.log("保存播放器设置成功");
-    }
-  );
+  try {
+    fs.writeFileSync(
+      path.resolve(process.cwd(), "playerSetting.json"),
+      JSON.stringify(setting)
+    );
+    console.log("保存播放器设置成功");
+  } catch (err) {
+    console.error("保存播放器设置失败", err);
+    return;
+  }
 
   // 发送退出消息
   ipcRenderer.send("quit");
@@ -59,7 +59,10 @@ function quit() {
         <span>MMPlayer</span>
       </div>
     </div>
-    <div id="app-header__right" :style="isFullPage ? 'background-color: #fbfcfe;' : ''">
+    <div
+      id="app-header__right"
+      :style="isFullPage ? 'background-color: #fbfcfe;' : ''"
+    >
       <!-- <div id="app-header__right_search">
         <input type="text" placeholder="Search" />
       </div> -->
@@ -158,9 +161,11 @@ function quit() {
   height: 48px;
   -webkit-app-region: drag;
 }
+
 #app-header button {
   -webkit-app-region: no-drag;
 }
+
 #app-header__left {
   float: left;
   width: 220px;
@@ -168,6 +173,7 @@ function quit() {
   background-color: #fbfcfe;
   border-radius: 8px 0 0 0;
 }
+
 #app-header__left_title {
   display: flex;
   justify-content: center;
@@ -180,6 +186,7 @@ function quit() {
   line-height: 161.8%;
   color: #4e5969;
 }
+
 #app-header__right {
   float: right;
   width: calc(100% - 220px);
@@ -191,6 +198,7 @@ function quit() {
   align-items: center;
   justify-content: flex-end;
 }
+
 #app-header__right_search {
   -webkit-app-region: no-drag;
   position: absolute;
@@ -204,6 +212,7 @@ function quit() {
   width: 200px;
   height: 48px;
 }
+
 #app-header__right_search input {
   width: 100%;
   height: 32px;
@@ -220,17 +229,20 @@ function quit() {
   top: 0;
   right: 0;
 }
+
 #app-header svg {
   -webkit-app-region: no-drag;
   cursor: pointer;
   fill: #000;
   stroke: #000;
 }
+
 #app-header svg:hover {
   fill: #ffffff;
   stroke: #ffffff;
   background-color: #c9cdd4;
 }
+
 #app-header .close:hover {
   background-color: #f76560;
   border-radius: 0 8px 0 0;
