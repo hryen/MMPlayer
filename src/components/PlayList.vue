@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onMounted } from "vue";
 import { useMainStore } from "@/stores/main";
 import { usePlayerStore } from "@/stores/player";
 import { storeToRefs } from "pinia";
@@ -14,19 +15,21 @@ const path = require("path");
 const fs = require("fs");
 const { ipcRenderer, shell } = require("electron");
 
-// 读取已保存的播放列表
 const playListsFile = path.resolve(process.cwd(), "playLists.json");
-try {
-  const start = new Date().getTime();
-  playLists.value = JSON.parse(fs.readFileSync(playListsFile));
-  console.log("读取播放列表完成, 用时", new Date().getTime() - start, "ms");
-} catch (err: any) {
-  if (err.code === "ENOENT") {
-    console.log(playListsFile + " not found");
-  } else {
-    console.error("读取已保存的播放列表时出错", err);
+onMounted(() => {
+  // 读取已保存的播放列表
+  try {
+    const start = new Date().getTime();
+    playLists.value = JSON.parse(fs.readFileSync(playListsFile));
+    console.log("读取播放列表完成, 用时", new Date().getTime() - start, "ms");
+  } catch (err: any) {
+    if (err.code === "ENOENT") {
+      console.log(playListsFile + " not found");
+    } else {
+      console.error("读取已保存的播放列表时出错", err);
+    }
   }
-}
+});
 
 // 刷新所有歌单的歌曲
 function refreshPlayList() {
@@ -48,7 +51,7 @@ function refreshPlayList() {
       }
     }
   );
-  
+
   // TODO: 提示刷新完成
   console.log("刷新歌单完成");
 }
