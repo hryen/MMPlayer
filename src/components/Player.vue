@@ -24,9 +24,15 @@ ipcRenderer.on("playPause", (event: any, arg: any) => {
 ipcRenderer.on("playNext", (event: any, arg: any) => {
   playerStore.playNext();
 });
+
 function toggleFullPage() {
   isFullPage.value = !isFullPage.value;
   window.dispatchEvent(new Event("resize"));
+  if (isFullPage.value) {
+    ipcRenderer.send("set-thumbnail-clip", "lyric");
+  } else {
+    ipcRenderer.send("set-thumbnail-clip");
+  }
 }
 </script>
 
