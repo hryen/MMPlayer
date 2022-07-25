@@ -24,6 +24,10 @@ ipcRenderer.on("playPause", (event: any, arg: any) => {
 ipcRenderer.on("playNext", (event: any, arg: any) => {
   playerStore.playNext();
 });
+function toggleFullPage() {
+  isFullPage.value = !isFullPage.value;
+  window.dispatchEvent(new Event("resize"));
+}
 </script>
 
 <template>
@@ -37,7 +41,7 @@ ipcRenderer.on("playNext", (event: any, arg: any) => {
             : 'data:image/png;base64,' + coverArt
         "
         alt="Cover"
-        @click="isFullPage = !isFullPage"
+        @click="toggleFullPage"
       />
     </div>
 
@@ -55,7 +59,7 @@ ipcRenderer.on("playNext", (event: any, arg: any) => {
     </div>
 
     <div id="player-controls">
-      <div id="player-controls__buttons">
+      <div id="player-controls__buttons" v-show="!isFullPage">
         <!-- https://www.iconfinder.com/icons/9026032/repeat_icon -->
         <svg
           v-show="loopMode === 'repeat'"
