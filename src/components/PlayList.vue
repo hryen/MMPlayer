@@ -3,11 +3,13 @@ import { useMainStore } from "@/stores/main";
 import { usePlayerStore } from "@/stores/player";
 import { storeToRefs } from "pinia";
 import { walkDirectory } from "@/utils/musicTool";
+import { ref } from "vue";
+import Spin from "@/components/Spin.vue";
 
 const mainStore = useMainStore();
 const playerStore = usePlayerStore();
 
-const { playLists, showingPlayListIndex, isLoading } = storeToRefs(mainStore);
+const { playLists, showingPlayListIndex } = storeToRefs(mainStore);
 const { playingPlayListIndex, playingTrackIndex } = storeToRefs(playerStore);
 
 const path = require("path");
@@ -16,12 +18,14 @@ const { ipcRenderer, shell } = require("electron");
 
 const playListsFile = path.resolve(process.cwd(), "playLists.json");
 
+const isLoading = ref(false);
 // 刷新所有歌单的歌曲
-function refreshPlayList() {
-  playLists.value.forEach(async (playList) => {
-    const tracks = await walkDirectory(playList.path);
-    playList.tracks = tracks;
-  });
+async function refreshPlayList() {
+  isLoading.value = true;
+  for (let i = 0; i < playLists.value.length; i++) {
+    const tracks = await walkDirectory(playLists.value[i].path);
+    playLists.value[i].tracks = tracks;
+  }
 
   // 保存歌单列表
   writePlayListToFile(playListsFile);
@@ -39,6 +43,7 @@ function refreshPlayList() {
 
   // TODO: 提示刷新完成
   console.log("刷新歌单完成");
+  isLoading.value = false;
 }
 
 // 添加歌单
@@ -48,16 +53,15 @@ function addPlayList() {
 ipcRenderer.on("dialogOpenDirectory-reply", async (event: any, arg: any) => {
   // console.log("addPlayList", arg);
   if (!arg.canceled) {
+    isLoading.value = true;
     const playList = {
       id: playLists.value.length + 1,
       path: arg.filePaths[0].replaceAll("\\", "/"),
       tracks: [] as any,
     };
-    playLists.value.push(playList);
     // 扫描歌曲
-    playLists.value[playLists.value.length - 1].tracks = await walkDirectory(
-      playList.path
-    );
+    playList.tracks = await walkDirectory(playList.path);
+    playLists.value.push(playList);
 
     // 如果添加后只有一个歌单，则自动选中
     if (playLists.value.length === 1) {
@@ -67,6 +71,7 @@ ipcRenderer.on("dialogOpenDirectory-reply", async (event: any, arg: any) => {
 
     // 保存歌单列表
     writePlayListToFile(playListsFile);
+    isLoading.value = false;
   }
 });
 
@@ -156,58 +161,42 @@ function writePlayListToFile(path: string) {
 
 <template>
   <div id="left-menu">
-    <div id="left-menu__playlists">
-      <div class="left-menu__playlists-header">
-        <div class="title">我的歌单</div>
+    <Spin :loading="isLoading" tip="loading..." />
+    <div class="left-menu__playlists-header">
+      <div class="title">我的歌单</div>
 
-        <div style="display: flex; gap: 8px">
-          <svg
-            @click="addPlayList"
-            class="left-menu__playlists-add"
-            xmlns="http://www.w3.org/2000/svg"
-            width="20px"
-            height="20px"
-            viewBox="0 0 24 24"
-            fill="#4e5969"
-          >
-            <title>添加歌单</title>
-            <path d="M0 0h24v24H0z" fill="none" />
-            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-          </svg>
+      <div style="display: flex; gap: 8px">
+        <svg
+          @click="addPlayList"
+          class="left-menu__playlists-add"
+          xmlns="http://www.w3.org/2000/svg"
+          width="20px"
+          height="20px"
+          viewBox="0 0 24 24"
+          fill="#4e5969"
+        >
+          <title>添加歌单</title>
+          <path d="M0 0h24v24H0z" fill="none" />
+          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+        </svg>
 
-          <svg
-            v-show="!isLoading"
-            @click="refreshPlayList"
-            class="left-menu__playlists-add"
-            xmlns="http://www.w3.org/2000/svg"
-            height="20px"
-            width="18px"
-            viewBox="0 0 24 24"
-            fill="#4e5969"
-          >
-            <title>重新扫描所有歌单</title>
-            <path d="M0 0h24v24H0z" fill="none" />
-            <path
-              d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"
-            />
-          </svg>
-          <svg
-            v-show="isLoading"
-            class="loading-turn"
-            xmlns="http://www.w3.org/2000/svg"
-            height="20px"
-            width="18px"
-            viewBox="0 0 24 24"
-            fill="#4e5969"
-          >
-            <title>正在扫描中</title>
-            <path d="M0 0h24v24H0z" fill="none" />
-            <path
-              d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"
-            />
-          </svg>
-        </div>
-        <!-- <svg
+        <svg
+          @click="refreshPlayList"
+          class="left-menu__playlists-add"
+          xmlns="http://www.w3.org/2000/svg"
+          height="20px"
+          width="18px"
+          viewBox="0 0 24 24"
+          fill="#4e5969"
+        >
+          <title>重新扫描所有歌单</title>
+          <path d="M0 0h24v24H0z" fill="none" />
+          <path
+            d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"
+          />
+        </svg>
+      </div>
+      <!-- <svg
           @click="exportPlayList"
           class="left-menu__playlists-add"
           xmlns="http://www.w3.org/2000/svg"
@@ -219,8 +208,9 @@ function writePlayListToFile(path: string) {
           <path d="M0 0h24v24H0z" fill="none" />
           <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
         </svg> -->
-      </div>
+    </div>
 
+    <div id="left-menu__playlists">
       <template v-for="(item, index) in playLists">
         <div
           @contextmenu.prevent="showPlayListMenu(index)"
@@ -247,37 +237,14 @@ function writePlayListToFile(path: string) {
 <style>
 #left-menu {
   background-color: #fbfcfe;
-  /* background: #efefef; */
   width: 220px;
   height: calc(100% - 48px - 72px);
   position: absolute;
   left: 0;
   top: 48px;
   box-sizing: border-box;
+}
 
-  overflow-y: auto;
-  scroll-behavior: smooth;
-}
-#left-menu::-webkit-scrollbar {
-  width: 10px;
-}
-#left-menu::-webkit-scrollbar-track {
-  background-color: transparent;
-}
-#left-menu::-webkit-scrollbar-thumb {
-  background-color: #e5e6eb;
-  border-radius: 4px;
-}
-#left-menu::-webkit-scrollbar-thumb:hover {
-  background-color: #c9cdd4;
-}
-#left-menu__playlists {
-  padding-right: 16px;
-  display: flex;
-  flex-flow: column;
-  align-items: flex-start;
-  justify-self: center;
-}
 .left-menu__playlists-header {
   display: flex;
   justify-content: space-between;
@@ -294,6 +261,27 @@ function writePlayListToFile(path: string) {
 .left-menu__playlists-add:hover {
   cursor: pointer;
 }
+
+#left-menu__playlists {
+  height: calc(100% - 30px);
+  padding-right: 16px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+#left-menu__playlists::-webkit-scrollbar {
+  width: 10px;
+}
+#left-menu__playlists::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+#left-menu__playlists::-webkit-scrollbar-thumb {
+  background-color: #e5e6eb;
+  border-radius: 4px;
+}
+#left-menu__playlists::-webkit-scrollbar-thumb:hover {
+  background-color: #c9cdd4;
+}
+
 .playlist-title {
   width: 100%;
   padding: 10px;
@@ -309,33 +297,8 @@ function writePlayListToFile(path: string) {
 .playlist-title:hover,
 .playlist-title.playlist-active {
   cursor: pointer;
-  /* background-color: #efefef; */
   background: linear-gradient(0.25turn, #e8f3ff, #fbfcfe);
   color: #165dff;
   border-left: 2px solid #165dff;
-}
-.loading-turn {
-  /* turn : 定义的动画名称
-     1s : 动画时间
-     linear : 动画以何种运行轨迹完成一个周期
-     infinite :规定动画应该无限次播放 */
-  animation: turn 2s linear infinite;
-}
-@keyframes turn {
-  0% {
-    -webkit-transform: rotate(0deg);
-  }
-  25% {
-    -webkit-transform: rotate(90deg);
-  }
-  50% {
-    -webkit-transform: rotate(180deg);
-  }
-  75% {
-    -webkit-transform: rotate(270deg);
-  }
-  100% {
-    -webkit-transform: rotate(360deg);
-  }
 }
 </style>

@@ -1,12 +1,6 @@
 import { Track } from "@/models/track";
-import { useMainStore } from "@/stores/main";
-import { storeToRefs } from "pinia";
 
 export function walkDirectory(dirPath: string): Promise<Track[]> {
-  const mainStore = useMainStore();
-  const { isLoading } = storeToRefs(mainStore);
-  isLoading.value = true;
-
   const path = require("path");
   const { exec } = require("child_process");
   const start = new Date().getTime();
@@ -26,12 +20,10 @@ export function walkDirectory(dirPath: string): Promise<Track[]> {
           "ms"
         );
         resolve(JSON.parse(stdout));
-        isLoading.value = false;
       } catch (err) {
         console.log("walkDirectory 出错了", err); // TODO: 提示用户
         console.log("stdout", stdout);
         resolve([]);
-        isLoading.value = false;
       }
     });
   });
