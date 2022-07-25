@@ -73,7 +73,7 @@ app.whenReady().then(() => {
     mainWindow.show();
     mainWindow.webContents.send("rendered");
     setThumbarButtons(false);
-    mainWindow.setThumbnailClip({ x: 20, y: 678, width: 44, height: 44 });
+    mainWindow.setThumbnailClip({ x: 20, y: 656, width: 44, height: 44 });
   });
 
   app.on("activate", function () {
@@ -85,13 +85,13 @@ app.whenReady().then(() => {
 ipcMain.on("set-thumbnail-clip", (event, arg) => {
   if (arg === "lyric") {
     mainWindow.setThumbnailClip({
-      x: 186,
-      y: 142,
-      width: 284,
-      height: 284,
+      x: 174,
+      y: 130,
+      width: 288,
+      height: 288,
     });
   } else {
-    mainWindow.setThumbnailClip({ x: 20, y: 678, width: 44, height: 44 });
+    mainWindow.setThumbnailClip({ x: 20, y: 656, width: 44, height: 44 });
   }
 });
 
