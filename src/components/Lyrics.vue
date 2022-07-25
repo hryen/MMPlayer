@@ -26,8 +26,8 @@ const { isFullPage, track, coverArt, nextLrcIndex, loopMode, isPlaying } =
         <svg
           v-show="loopMode === 'repeat'"
           @click="playerStore.togglePlayMode()"
-          width="30"
-          height="30"
+          width="24"
+          height="24"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 256 256"
         >
@@ -67,8 +67,8 @@ const { isFullPage, track, coverArt, nextLrcIndex, loopMode, isPlaying } =
         <svg
           v-show="loopMode === 'repeatOne'"
           @click="playerStore.togglePlayMode()"
-          width="30"
-          height="30"
+          width="24"
+          height="24"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 256 256"
         >
@@ -115,8 +115,8 @@ const { isFullPage, track, coverArt, nextLrcIndex, loopMode, isPlaying } =
         <svg
           v-show="loopMode === 'shuffle'"
           @click="playerStore.togglePlayMode()"
-          width="30"
-          height="30"
+          width="24"
+          height="24"
           xmlns="http://www.w3.org/2000/svg"
           id="Layer_1"
           x="0"
@@ -168,8 +168,8 @@ const { isFullPage, track, coverArt, nextLrcIndex, loopMode, isPlaying } =
         <svg
           @click="playerStore.playPrev()"
           xmlns="http://www.w3.org/2000/svg"
-          width="30"
-          height="30"
+          width="24"
+          height="24"
           viewBox="0 0 16 16"
         >
           <title>上一首</title>
@@ -184,8 +184,8 @@ const { isFullPage, track, coverArt, nextLrcIndex, loopMode, isPlaying } =
           v-show="!isPlaying"
           @click="playerStore.playPause()"
           xmlns="http://www.w3.org/2000/svg"
-          width="64"
-          height="64"
+          width="50"
+          height="50"
           viewBox="0 0 24 24"
         >
           <title>播放</title>
@@ -200,8 +200,8 @@ const { isFullPage, track, coverArt, nextLrcIndex, loopMode, isPlaying } =
           v-show="isPlaying"
           @click="playerStore.playPause()"
           xmlns="http://www.w3.org/2000/svg"
-          width="64"
-          height="64"
+          width="50"
+          height="50"
           viewBox="0 0 24 24"
         >
           <title>暂停</title>
@@ -215,8 +215,8 @@ const { isFullPage, track, coverArt, nextLrcIndex, loopMode, isPlaying } =
         <svg
           @click="playerStore.playNext()"
           xmlns="http://www.w3.org/2000/svg"
-          width="30"
-          height="30"
+          width="24"
+          height="24"
           viewBox="0 0 16 16"
         >
           <title>下一首</title>
@@ -229,8 +229,8 @@ const { isFullPage, track, coverArt, nextLrcIndex, loopMode, isPlaying } =
         <!-- https://www.iconfinder.com/iconsets/phosphor-regular-vol-4 -->
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="30"
-          height="30"
+          width="24"
+          height="24"
           viewBox="0 0 256 256"
         >
           <!-- <title>下一首</title> -->
