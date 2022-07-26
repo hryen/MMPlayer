@@ -27,7 +27,7 @@ ipcRenderer.on("playNext", (event: any, arg: any) => {
 
 function toggleFullPage() {
   isFullPage.value = !isFullPage.value;
-  window.dispatchEvent(new Event("resize"));
+  // window.dispatchEvent(new Event("resize"));
   if (isFullPage.value) {
     ipcRenderer.send("set-thumbnail-clip", "lyric");
   } else {
