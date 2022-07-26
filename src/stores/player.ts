@@ -132,7 +132,7 @@ export const usePlayerStore = defineStore("player", {
               this.playingPlayListIndex,
               this.playingTrackIndex
             );
-            this.wavesurfer.load(this.track.path, data);
+            this.wavesurfer.load(this.track.path, data, "metadata");
           } catch (err) {
             this.wavesurfer.load(this.track.path);
           }
@@ -183,33 +183,49 @@ export const usePlayerStore = defineStore("player", {
     },
     handleOnWaveformReady() {
       // 生成 peaks 数据
-      this.wavesurfer.exportPCM(1024, 10000, true, 0).then((data: any) => {
-        const path = require("path");
-        const fs = require("fs");
-
-        const peakFile = path.resolve(
-          process.cwd(),
-          "cache",
-          "peak_data",
-          this.playingPlayListIndex + "",
-          this.playingTrackIndex + ".json"
-        );
-
-        // 如果文件夹不存在，则创建
-        const dir = path.dirname(peakFile);
-        if (!fs.existsSync(dir)) {
-          fs.mkdirSync(dir, { recursive: true });
-        }
-        // 将 data 写入文件
-        fs.writeFile(peakFile, JSON.stringify(data), (err: any) => {
-          if (err) {
-            console.error("保存 peek data 失败", err);
+      const path = require("path");
+      const fs = require("fs");
+      const peakFile = path.resolve(
+        process.cwd(),
+        "cache",
+        "peak_data",
+        this.playingPlayListIndex + "",
+        this.playingTrackIndex + ".json"
+      );
+      // 如果文件不存在，则生成文件
+      if (!fs.existsSync(peakFile)) {
+        this.wavesurfer.exportPCM(1024, 10000, true, 0).then((data: any) => {
+          // 如果文件夹不存在，则创建
+          const dir = path.dirname(peakFile);
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
           }
+          // 将 data 写入文件
+          fs.writeFile(peakFile, JSON.stringify(data), (err: any) => {
+            if (err) {
+              console.error("保存 peek data 失败", err);
+            }
+          });
         });
-      });
+      }
 
-      // console.log("waveform-ready");
-      this.trackDuration = wavesurferTimeFormat(this.wavesurfer.getDuration());
+      const d = this.wavesurfer.getDuration();
+      if (d) {
+        this.trackDuration = wavesurferTimeFormat(d);
+      }
+      // audio on loaded metadata, track duration
+      // 因为每次切歌后 audio 元素会被重置，所以需要每次切歌后重新绑定事件
+      const a = document.querySelector("audio");
+      if (a) {
+        const that = this;
+        a.addEventListener("loadedmetadata", function () {
+          console.log("loadedmetadata");
+          that.trackDuration = wavesurferTimeFormat(
+            that.wavesurfer.getDuration()
+          );
+        });
+      }
+
       // // 设置专辑封面
       // const path = require("path");
       // const { exec } = require("child_process");
@@ -332,7 +348,7 @@ export const usePlayerStore = defineStore("player", {
           this.playingPlayListIndex,
           this.playingTrackIndex
         );
-        this.wavesurfer.load(this.track.path, data);
+        this.wavesurfer.load(this.track.path, data, "metadata");
       } catch (err) {
         this.wavesurfer.load(this.track.path);
       }
