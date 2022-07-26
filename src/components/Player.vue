@@ -38,29 +38,30 @@ function toggleFullPage() {
 
 <template>
   <div id="player">
-    <div id="player-cover">
-      <img
-        id="player-cover__img"
-        :src="
-          coverArt.startsWith('.')
-            ? coverArt
-            : 'data:image/png;base64,' + coverArt
-        "
-        alt="Cover"
-        @click="toggleFullPage"
-      />
-    </div>
-
-    <div id="player-info">
-      <div
-        id="player-info__title"
-        :title="track.title + '\r单击可定位至该歌曲'"
-        @click="playerStore.locatePlayingTrack()"
-      >
-        {{ track.title }}
+    <div id="player-track-info">
+      <div id="track-cover">
+        <img
+          id="track-cover__img"
+          :src="
+            coverArt.startsWith('.')
+              ? coverArt
+              : 'data:image/png;base64,' + coverArt
+          "
+          alt="Cover"
+          @click="toggleFullPage"
+        />
       </div>
-      <div id="player-info__artist" :title="track.artist">
-        {{ track.artist }}
+      <div id="track-info">
+        <div
+          id="track-title"
+          :title="track.title + '\r单击可定位至该歌曲'"
+          @click="playerStore.locatePlayingTrack()"
+        >
+          {{ track.title }}
+        </div>
+        <div id="track-artist" :title="track.artist">
+          {{ track.artist }}
+        </div>
       </div>
     </div>
 
@@ -299,7 +300,7 @@ function toggleFullPage() {
   </div>
 </template>
 
-<style>
+<style scoped>
 #player {
   background-color: #ffffff;
   width: 100%;
@@ -314,21 +315,24 @@ function toggleFullPage() {
   flex-direction: row;
   justify-content: space-around;
 }
-
-#player-cover {
+#player-track-info {
+  width: 220px;
+  display: flex;
+}
+#track-cover {
   padding: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-#player-cover__img {
+#track-cover__img {
   width: 48px;
   height: 48px;
   border-radius: 4px;
   cursor: pointer;
 }
 
-#player-info {
+#track-info {
   width: 148px;
   display: flex;
   flex-direction: column;
@@ -336,8 +340,9 @@ function toggleFullPage() {
   line-height: 1.6;
 
   user-select: text;
+  padding-right: 12px;
 }
-#player-info__title {
+#track-title {
   font-size: 14px;
   font-weight: bold;
   color: #333;
@@ -348,7 +353,7 @@ function toggleFullPage() {
 
   cursor: pointer;
 }
-#player-info__artist {
+#track-artist {
   font-size: 12px;
   color: #333;
 
@@ -358,12 +363,12 @@ function toggleFullPage() {
 }
 
 #player-controls {
-  width: calc(100% - 220px);
+  width: 100%;
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  padding: 0 10px 0 30px;
+  padding: 0 10px;
   gap: 30px;
 }
 
