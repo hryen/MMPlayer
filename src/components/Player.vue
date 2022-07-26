@@ -66,7 +66,7 @@ function toggleFullPage() {
     </div>
 
     <div id="player-controls">
-      <div id="player-controls__buttons" v-show="!isFullPage">
+      <div id="player-controls__buttons">
         <!-- https://www.iconfinder.com/icons/9026032/repeat_icon -->
         <svg
           v-show="loopMode === 'repeat'"

@@ -508,9 +508,9 @@ export const usePlayerStore = defineStore("player", {
       } else {
         line = 0;
       }
-      document.getElementById("lyrics-container").scrollTop =
-        document.getElementById("lyrics-line" + line).offsetTop +
-        document.getElementById("lyrics-line" + line).offsetParent.offsetTop -
+      document.getElementById("lyrics").scrollTop =
+        document.getElementById("lyric-line" + line).offsetTop +
+        document.getElementById("lyric-line" + line).offsetParent.offsetTop -
         120; // 40是一行的高度，减去3行的高度
     },
 
