@@ -557,7 +557,7 @@ export const usePlayerStore = defineStore("player", {
         lrcContent = iconvlite.decode(data, "gbk");
         // console.log(lrcContent);
       } catch (err) {
-        this.track.lyricsList = [{ time: "0", text: "暂无歌词" }];
+        this.track.lyricsList = [{ time: "0", text: "未找到歌词文件" }];
         this.nextLrcIndex = 1;
         // console.error(err);
         return;
