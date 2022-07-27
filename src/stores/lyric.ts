@@ -4,8 +4,6 @@ import { usePlayerStore } from "@/stores/player";
 export const useLyricStore = defineStore("lyric", {
   state: () => ({
     lyricPageVisible: false as boolean,
-    lyricElements: [] as any,
-
     lyricInterval: null as any,
     nextLyricIndex: 1 as number,
   }),
@@ -53,35 +51,21 @@ export const useLyricStore = defineStore("lyric", {
         return;
       }
 
-      console.log("showLyric", line);
       if (line >= 5) {
         line -= 5;
       } else {
         line = 0;
       }
 
-      document.getElementById("lyrics").scrollTop =
-        document.getElementById("lyric-" + line).offsetTop +
-        document.getElementById("lyric-" + line).offsetParent.offsetTop -
-        120; // 40是一行的高度，减去3行的高度
-      // console.log(this.lyricElements.value);
-      // if (this.lyricElements.value) {
-      //   // const parentElement = this.lyricElements.value[line].parentElement;
-
-      //   // console.log("lyrics scrollTop", this.lyricElements.value[line].parentElement.scrollTop);
-      //   // console.log("lyric offsetTop", this.lyricElements.value[line].offsetTop);
-      //   // console.log("lyric offsetParent offsetTop", this.lyricElements.value[line].offsetParent.offsetTop);
-
-      //   this.lyricElements.value[line].parentElement.scrollTop =
-      //     this.lyricElements.value[line].offsetTop +
-      //     this.lyricElements.value[line].offsetParent.offsetTop -
-      //     120;
-
-      //   // if (this.lyricElements.value[line].offsetParent) {
-      //   //   const parent = lyricLines.value[9].offsetParent as HTMLElement;
-      //   //   console.log("lyric-line10 offsetParent offsetTop", parent.offsetTop);
-      //   // }
-      // }
+      const lyricsElement = document.getElementById("lyrics");
+      const lyricElement = document.getElementById("lyric-" + line);
+      if (lyricsElement && lyricElement) {
+        const offsetParent = lyricElement.offsetParent as HTMLElement;
+        if (offsetParent) {
+          lyricsElement.scrollTop =
+            lyricElement.offsetTop + offsetParent.offsetTop - 120; // 一行的高度是40，减去3行的高度
+        }
+      }
     },
     seekLyric() {
       const playerStore = usePlayerStore();

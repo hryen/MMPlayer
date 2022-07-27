@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { usePlayerStore } from "@/stores/player";
+import { useLyricStore } from "@/stores/lyric";
 import { storeToRefs } from "pinia";
 import { PlayerSetting } from "@/models/playerSetting";
 
@@ -16,14 +17,11 @@ ipcRenderer.on("maximize-reply", (_event: String, arg: boolean) => {
 });
 
 const playerStore = usePlayerStore();
-const {
-  wavesurfer,
-  playingPlayListIndex,
-  playingTrackIndex,
-  loopMode,
-  lyricPageVisible,
-} = storeToRefs(playerStore);
+const { wavesurfer, playingPlayListIndex, playingTrackIndex, loopMode } =
+  storeToRefs(playerStore);
 
+const lyricStore = useLyricStore();
+const { lyricPageVisible } = storeToRefs(lyricStore);
 function quit() {
   // 退出前先保存当前播放的歌曲、时间、歌曲列表、播放模式
   // console.log(wavesurfer.value, playingPlayListIndex.value, playingTrackIndex.value, loopMode.value);
