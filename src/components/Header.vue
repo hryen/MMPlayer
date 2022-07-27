@@ -17,7 +17,7 @@ ipcRenderer.on("maximize-reply", (_event: String, arg: boolean) => {
 });
 
 const playerStore = usePlayerStore();
-const { wavesurfer, playingPlayListIndex, playingTrackIndex, loopMode } =
+const { trackCurrentTime, playingPlayListIndex, playingTrackIndex, loopMode } =
   storeToRefs(playerStore);
 
 const lyricStore = useLyricStore();
@@ -29,17 +29,16 @@ function quit() {
     playingPlayListIndex: playingPlayListIndex.value,
     playingTrackIndex: playingTrackIndex.value,
     loopMode: loopMode.value,
-    trackCurrentTime: wavesurfer.value.getCurrentTime(),
+    trackCurrentTime: trackCurrentTime.value,
   };
   // console.log(JSON.stringify(setting));
-  const path = require("path");
   const fs = require("fs");
+  const path = require("path");
   try {
     fs.writeFileSync(
       path.resolve(process.cwd(), "playerSetting.json"),
       JSON.stringify(setting)
     );
-    console.log("保存播放器设置成功");
   } catch (err) {
     console.error("保存播放器设置失败", err);
     return;
