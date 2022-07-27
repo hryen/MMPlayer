@@ -226,73 +226,6 @@ export const usePlayerStore = defineStore("player", {
           that.trackDuration = that.wavesurfer.getDuration();
         });
       }
-
-      // // 设置专辑封面
-      // const path = require("path");
-      // const { exec } = require("child_process");
-
-      // const command =
-      //   '"' +
-      //   path.resolve(process.cwd(), "tools", "musicTool.exe") +
-      //   '" cover "' +
-      //   this.track.path +
-      //   '"';
-
-      // exec(command, (_error: any, stdout: any, _stderr: any) => {
-      //   if (stdout !== "") {
-      //     this.coverArt = stdout;
-      //   } else {
-      //     this.coverArt = "./assets/album_black_48dp.svg";
-      //   }
-      // });
-
-      // // console.log(this.track);
-
-      // // 读取歌词
-      // const lrcArray = [];
-      // const iconvlite = require("iconv-lite");
-      // const fs = require("fs");
-
-      // let lrcPath = this.track.path;
-      // lrcPath = lrcPath.substring(0, lrcPath.lastIndexOf(".")) + ".lrc";
-      // lrcPath = lrcPath.replaceAll("\\", "/");
-      // // console.log(lrcPath);
-
-      // let lrcContent = "";
-      // try {
-      //   const data = fs.readFileSync(lrcPath);
-      //   lrcContent = iconvlite.decode(data, "gbk");
-      //   // console.log(lrcContent);
-      // } catch (err) {
-      //   this.track.lyricsList = [{ time: "0", text: "暂无歌词" }];
-      //   this.nextLrcIndex = 1;
-      //   // console.error(err);
-      //   return;
-      // }
-
-      // const lrc = lrcContent.split("\n");
-      // for (let i = 0; i < lrc.length; i++) {
-      //   let l = lrc[i];
-      //   if (l.match(/^\[.*?](\r)?$/)) {
-      //     continue;
-      //   }
-
-      //   let timeMatch = l.match(/\[(\d{2}):(\d{2})(\.|:)(\d{2})]/);
-      //   if (timeMatch) {
-      //     let min = parseInt(timeMatch[1]);
-      //     let sec = parseInt(timeMatch[2]);
-      //     let ms = parseInt(timeMatch[4]);
-      //     const time = min * 60 + sec + ms / 1000;
-      //     let text = l.replace(/\[(\d{2}):(\d{2})(\.|:)(\d{2})]/, "");
-      //     lrcArray.push({
-      //       time: time + "",
-      //       text: text.replaceAll("\r", ""),
-      //     });
-      //   }
-      // }
-      // this.track.lyricsList = lrcArray;
-      // this.nextLrcIndex = 1;
-      // this.startLrcInterval();
     },
     handleOnInteraction() {
       if (!this.wavesurfer.isPlaying()) {
@@ -453,7 +386,7 @@ export const usePlayerStore = defineStore("player", {
       window.location.href = href;
     },
 
-    // 获取歌曲封面、歌词，设置封面、程序标题、歌词
+    // 获取专辑封面、歌词，然后设置专辑封面、歌词
     getAndSetTrackInfo() {
       // 设置专辑封面
       const path = require("path");
@@ -523,7 +456,6 @@ export const usePlayerStore = defineStore("player", {
       this.track.lyricsList = lrcArray;
       // console.log(this.track.lyricsList);
       nextLyricIndex.value = 1;
-      // this.goToLyricsLine(0);
       useLyricStore().showLyric(0);
     },
   },
