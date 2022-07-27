@@ -7,6 +7,6 @@ export interface Track {
 }
 
 export interface Lyrics {
-  time: string;
+  time: number;
   text: string;
 }

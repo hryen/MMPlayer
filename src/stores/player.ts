@@ -1,6 +1,7 @@
 import { defineStore, storeToRefs } from "pinia";
 import { Track } from "@/models/track";
 import { useMainStore } from "@/stores/main";
+import { useLyricStore } from "@/stores/lyric";
 import { PlayerSetting } from "@/models/playerSetting";
 import { getPeakData } from "@/utils/musicTool";
 
@@ -11,23 +12,22 @@ export const usePlayerStore = defineStore("player", {
     playingTrackIndex: 0 as number,
     playingPlayListIndex: 0 as number,
     isPlaying: false as boolean,
+
     track: {} as Track,
-    trackCurrentTime: "00:00" as string,
-    trackDuration: "00:00" as string,
+    trackDuration: 0 as number,
+
+    trackCurrentTime: 0 as number,
+    trackCurrentTimeInterval: null as any,
+
     coverArt: "./assets/album_black_48dp.svg" as string,
     loopMode: "repeat" as string, // repeat, repeatOne, shuffle
     prevTrackArray: [] as PrevTrack[],
-    shuffledTrackIndexArray: [] as number[],
+    shuffledTrackIndexArray: [] as number[], // 暂时没用
 
     volumeInterval: null as any,
-    trackCurrentTimeInterval: null as any,
-    lyricPageVisible: false as boolean, // 显示歌词页面
-    lrcInterval: null as any,
-    nextLrcIndex: 1 as number,
   }),
   actions: {
     init() {
-      // TODO:
       const mainStore = useMainStore();
       const { playLists } = storeToRefs(mainStore);
 
@@ -150,20 +150,21 @@ export const usePlayerStore = defineStore("player", {
         this.setTrackCurrentTime,
         200
       );
-      // TODO: 改变标题： 歌曲名 - 歌手名 - MMPlayer
 
-      this.startLrcInterval();
+      // this.startLrcInterval();
+      useLyricStore().startLyricInterval();
     },
     handleOnPause() {
       this.isPlaying = false;
       const { ipcRenderer } = require("electron");
       ipcRenderer.send("changePlayStatus", this.isPlaying);
       clearInterval(this.trackCurrentTimeInterval);
-      clearInterval(this.lrcInterval);
+      useLyricStore().clearLyricInterval();
     },
     handleOnSeek() {
       this.setTrackCurrentTime();
-      this.seekLrc();
+      // this.seekLrc();
+      useLyricStore().seekLyric();
     },
     handleOnFinish() {
       if (this.loopMode === "repeatOne") {
@@ -172,16 +173,19 @@ export const usePlayerStore = defineStore("player", {
         // this.playNext();
         const _this = this;
         setTimeout(function () {
-          clearInterval(_this.lrcInterval);
+          useLyricStore().clearLyricInterval();
           _this.playNext();
         }, 1000);
       }
     },
     handleOnDestroy() {
       clearInterval(this.trackCurrentTimeInterval);
-      clearInterval(this.lrcInterval);
+      useLyricStore().clearLyricInterval();
     },
     handleOnWaveformReady() {
+      // 设置标题
+      document.title = this.track.title + " - " + this.track.artist;
+
       // 生成 peaks 数据
       const path = require("path");
       const fs = require("fs");
@@ -211,7 +215,7 @@ export const usePlayerStore = defineStore("player", {
 
       const d = this.wavesurfer.getDuration();
       if (d) {
-        this.trackDuration = wavesurferTimeFormat(d);
+        this.trackDuration = d;
       }
       // audio on loaded metadata, track duration
       // 因为每次切歌后 audio 元素会被重置，所以需要每次切歌后重新绑定事件
@@ -219,10 +223,7 @@ export const usePlayerStore = defineStore("player", {
       if (a) {
         const that = this;
         a.addEventListener("loadedmetadata", function () {
-          // console.log("loadedmetadata");
-          that.trackDuration = wavesurferTimeFormat(
-            that.wavesurfer.getDuration()
-          );
+          that.trackDuration = that.wavesurfer.getDuration();
         });
       }
 
@@ -244,9 +245,6 @@ export const usePlayerStore = defineStore("player", {
       //     this.coverArt = "./assets/album_black_48dp.svg";
       //   }
       // });
-
-      // // 设置标题
-      // document.title = this.track.title + " - " + this.track.artist;
 
       // // console.log(this.track);
 
@@ -302,9 +300,7 @@ export const usePlayerStore = defineStore("player", {
       }
     },
     setTrackCurrentTime() {
-      this.trackCurrentTime = wavesurferTimeFormat(
-        this.wavesurfer.getCurrentTime()
-      );
+      this.trackCurrentTime = this.wavesurfer.getCurrentTime();
     },
     play(trackIndex: number, playingPlayListIndex: number) {
       // console.log("play");
@@ -453,66 +449,8 @@ export const usePlayerStore = defineStore("player", {
       if (showingPlayListIndex.value !== this.playingPlayListIndex) {
         showingPlayListIndex.value = this.playingPlayListIndex;
       }
-      this.lyricPageVisible = false;
+      useLyricStore().closeLyricPage();
       window.location.href = href;
-    },
-
-    startLrcInterval() {
-      const lrcArray = this.track.lyricsList;
-      if (!lrcArray || lrcArray.length <= 1) {
-        return;
-      }
-
-      const _this = this;
-      this.lrcInterval = setInterval(function () {
-        const currentTime = _this.wavesurfer.getCurrentTime();
-        const l = lrcArray[_this.nextLrcIndex];
-        if (_this.nextLrcIndex === lrcArray.length) {
-          return;
-        }
-        if (currentTime >= l.time) {
-          _this.goToLyricsLine(_this.nextLrcIndex);
-
-          _this.nextLrcIndex++;
-        }
-      }, 300);
-    },
-
-    seekLrc() {
-      const lyricsList = this.track.lyricsList;
-      if (!lyricsList || lyricsList.length <= 1) {
-        return;
-      }
-
-      const currentTime = parseInt(this.wavesurfer.getCurrentTime());
-      if (currentTime > parseFloat(lyricsList[lyricsList.length - 1].time)) {
-        this.nextLrcIndex = lyricsList.length;
-      } else {
-        for (let i = 0; i < lyricsList.length; i++) {
-          if (parseFloat(lyricsList[i].time) > currentTime) {
-            this.nextLrcIndex = i;
-            break;
-          }
-        }
-      }
-
-      this.goToLyricsLine(this.nextLrcIndex);
-    },
-
-    goToLyricsLine(line: number) {
-      if (!this.lyricPageVisible) {
-        return;
-      }
-
-      if (line >= 5) {
-        line -= 5;
-      } else {
-        line = 0;
-      }
-      document.getElementById("lyrics").scrollTop =
-        document.getElementById("lyric-line" + line).offsetTop +
-        document.getElementById("lyric-line" + line).offsetParent.offsetTop -
-        120; // 40是一行的高度，减去3行的高度
     },
 
     // 获取歌曲封面、歌词，设置封面、程序标题、歌词
@@ -536,15 +474,13 @@ export const usePlayerStore = defineStore("player", {
         }
       });
 
-      // 设置标题
-      document.title = this.track.title + " - " + this.track.artist;
-
       // console.log(this.track);
 
-      // 读取歌词
+      // TODO: 读取歌词
       const lrcArray = [];
       const iconvlite = require("iconv-lite");
       const fs = require("fs");
+      const { nextLyricIndex } = storeToRefs(useLyricStore());
 
       let lrcPath = this.track.path;
       lrcPath = lrcPath.substring(0, lrcPath.lastIndexOf(".")) + ".lrc";
@@ -557,8 +493,8 @@ export const usePlayerStore = defineStore("player", {
         lrcContent = iconvlite.decode(data, "gbk");
         // console.log(lrcContent);
       } catch (err) {
-        this.track.lyricsList = [{ time: "0", text: "未找到歌词文件" }];
-        this.nextLrcIndex = 1;
+        this.track.lyricsList = [{ time: 0, text: "未找到歌词文件" }];
+        nextLyricIndex.value = 1;
         // console.error(err);
         return;
       }
@@ -579,46 +515,19 @@ export const usePlayerStore = defineStore("player", {
           const time = min * 60 + sec + ms / 1000;
           let text = l.replace(/\[(\d{2}):(\d{2})(\.|:)(\d+)]/, "");
           lrcArray.push({
-            time: time + "",
+            time: time,
             text: text.replaceAll("\r", ""),
           });
         }
       }
       this.track.lyricsList = lrcArray;
       // console.log(this.track.lyricsList);
-      this.nextLrcIndex = 1;
-      this.goToLyricsLine(0);
-    },
-    toggleLyricPage() {
-      this.lyricPageVisible = !this.lyricPageVisible;
-      // window.dispatchEvent(new Event("resize"));
-      const { ipcRenderer } = require("electron");
-      if (this.lyricPageVisible) {
-        ipcRenderer.send("set-thumbnail-clip", "lyric");
-      } else {
-        ipcRenderer.send("set-thumbnail-clip");
-      }
+      nextLyricIndex.value = 1;
+      // this.goToLyricsLine(0);
+      useLyricStore().showLyric(0);
     },
   },
 });
-
-// https://github.com/katspaugh/wavesurfer.js/blob/00b9f7e4dcd04f66b5c7a3ae552aa9fb6ed588b4/example/angular-material/wavesurfer.directive.js#L97
-function wavesurferTimeFormat(input: number) {
-  if (!input) {
-    return "00:00";
-  }
-
-  const minutes = Math.floor(input / 60);
-  const seconds = Math.floor(input) % 60;
-
-  return (
-    (minutes < 10 ? "0" : "") +
-    minutes +
-    ":" +
-    (seconds < 10 ? "0" : "") +
-    seconds
-  );
-}
 
 function shuffleArray(length: number) {
   const array = [] as number[];

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { usePlayerStore } from "@/stores/player";
+import { useLyricStore } from "@/stores/lyric";
 import { storeToRefs } from "pinia";
 
 const playerStore = usePlayerStore();
@@ -12,6 +13,8 @@ const {
   loopMode,
 } = storeToRefs(playerStore);
 
+const lyricStore = useLyricStore();
+
 // 监听任务栏缩略图按钮事件
 const { ipcRenderer } = require("electron");
 ipcRenderer.on("playPrev", (event: any, arg: any) => {
@@ -23,6 +26,25 @@ ipcRenderer.on("playPause", (event: any, arg: any) => {
 ipcRenderer.on("playNext", (event: any, arg: any) => {
   playerStore.playNext();
 });
+
+
+// https://github.com/katspaugh/wavesurfer.js/blob/00b9f7e4dcd04f66b5c7a3ae552aa9fb6ed588b4/example/angular-material/wavesurfer.directive.js#L97
+function timeFormat(input: number) {
+  if (!input) {
+    return "00:00";
+  }
+
+  const minutes = Math.floor(input / 60);
+  const seconds = Math.floor(input) % 60;
+
+  return (
+    (minutes < 10 ? "0" : "") +
+    minutes +
+    ":" +
+    (seconds < 10 ? "0" : "") +
+    seconds
+  );
+}
 </script>
 
 <template>
@@ -37,7 +59,7 @@ ipcRenderer.on("playNext", (event: any, arg: any) => {
               : 'data:image/png;base64,' + coverArt
           "
           alt="Cover"
-          @click="playerStore.toggleLyricPage()"
+          @click="lyricStore.toggleVisible()"
         />
       </div>
       <div id="track-info">
@@ -281,9 +303,9 @@ ipcRenderer.on("playNext", (event: any, arg: any) => {
       </div>
       <div id="player-controls__bar">
         <div id="player-controls__waveform"></div>
-        <div id="player-controls__curr-time">{{ trackCurrentTime }}</div>
+        <div id="player-controls__curr-time">{{ timeFormat(trackCurrentTime) }}</div>
         &nbsp;/&nbsp;
-        <div id="player-controls__total-time">{{ trackDuration }}</div>
+        <div id="player-controls__total-time">{{ timeFormat(trackDuration) }}</div>
       </div>
     </div>
   </div>

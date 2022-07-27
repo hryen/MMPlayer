@@ -1,8 +1,14 @@
 <script setup lang="ts">
+import { useLyricStore } from "@/stores/lyric";
 import { usePlayerStore } from "@/stores/player";
 import { storeToRefs } from "pinia";
+
+const lyricStore = useLyricStore();
+const { lyricPageVisible, nextLyricIndex, lyricElements } =
+  storeToRefs(lyricStore);
+
 const playerStore = usePlayerStore();
-const { lyricPageVisible, track, coverArt, nextLrcIndex } = storeToRefs(playerStore);
+const { track, coverArt } = storeToRefs(playerStore);
 </script>
 
 <template>
@@ -29,8 +35,8 @@ const { lyricPageVisible, track, coverArt, nextLrcIndex } = storeToRefs(playerSt
       <template v-for="(item, index) in track.lyricsList">
         <!-- 显示11行歌词 -->
         <p
-          :id="'lyric-line' + index"
-          :class="{ highlight: nextLrcIndex - 1 === index }"
+          :id="'lyric-' + index"
+          :class="{ highlight: nextLyricIndex - 1 === index }"
         >
           {{ item.text }}
         </p>
