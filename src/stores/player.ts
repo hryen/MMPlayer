@@ -219,7 +219,7 @@ export const usePlayerStore = defineStore("player", {
       if (a) {
         const that = this;
         a.addEventListener("loadedmetadata", function () {
-          console.log("loadedmetadata");
+          // console.log("loadedmetadata");
           that.trackDuration = wavesurferTimeFormat(
             that.wavesurfer.getDuration()
           );
@@ -564,19 +564,20 @@ export const usePlayerStore = defineStore("player", {
       }
 
       const lrc = lrcContent.split("\n");
+      // console.log(lrc);
       for (let i = 0; i < lrc.length; i++) {
         let l = lrc[i];
         if (l.match(/^\[.*?](\r)?$/)) {
           continue;
         }
 
-        let timeMatch = l.match(/\[(\d{2}):(\d{2})(\.|:)(\d{2})]/);
+        let timeMatch = l.match(/\[(\d{2}):(\d{2})(\.|:)(\d+)]/);
         if (timeMatch) {
           let min = parseInt(timeMatch[1]);
           let sec = parseInt(timeMatch[2]);
           let ms = parseInt(timeMatch[4]);
           const time = min * 60 + sec + ms / 1000;
-          let text = l.replace(/\[(\d{2}):(\d{2})(\.|:)(\d{2})]/, "");
+          let text = l.replace(/\[(\d{2}):(\d{2})(\.|:)(\d+)]/, "");
           lrcArray.push({
             time: time + "",
             text: text.replaceAll("\r", ""),
@@ -584,6 +585,7 @@ export const usePlayerStore = defineStore("player", {
         }
       }
       this.track.lyricsList = lrcArray;
+      // console.log(this.track.lyricsList);
       this.nextLrcIndex = 1;
       this.goToLyricsLine(0);
     },
