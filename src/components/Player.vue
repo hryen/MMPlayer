@@ -17,16 +17,15 @@ const lyricStore = useLyricStore();
 
 // 监听任务栏缩略图按钮事件
 const { ipcRenderer } = require("electron");
-ipcRenderer.on("playPrev", (event: any, arg: any) => {
+ipcRenderer.on("playPrev", (_event: any, _arg: any) => {
   playerStore.playPrev();
 });
-ipcRenderer.on("playPause", (event: any, arg: any) => {
+ipcRenderer.on("playPause", (_event: any, _arg: any) => {
   playerStore.playPause();
 });
-ipcRenderer.on("playNext", (event: any, arg: any) => {
+ipcRenderer.on("playNext", (_event: any, _arg: any) => {
   playerStore.playNext();
 });
-
 
 // https://github.com/katspaugh/wavesurfer.js/blob/00b9f7e4dcd04f66b5c7a3ae552aa9fb6ed588b4/example/angular-material/wavesurfer.directive.js#L97
 function timeFormat(input: number) {
@@ -303,9 +302,13 @@ function timeFormat(input: number) {
       </div>
       <div id="player-controls__bar">
         <div id="player-controls__waveform"></div>
-        <div id="player-controls__curr-time">{{ timeFormat(trackCurrentTime) }}</div>
+        <div id="player-controls__curr-time">
+          {{ timeFormat(trackCurrentTime) }}
+        </div>
         &nbsp;/&nbsp;
-        <div id="player-controls__total-time">{{ timeFormat(trackDuration) }}</div>
+        <div id="player-controls__total-time">
+          {{ timeFormat(trackDuration) }}
+        </div>
       </div>
     </div>
   </div>

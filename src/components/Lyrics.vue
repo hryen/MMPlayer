@@ -4,8 +4,7 @@ import { usePlayerStore } from "@/stores/player";
 import { storeToRefs } from "pinia";
 
 const lyricStore = useLyricStore();
-const { lyricPageVisible, nextLyricIndex, lyricElements } =
-  storeToRefs(lyricStore);
+const { lyricPageVisible, nextLyricIndex } = storeToRefs(lyricStore);
 
 const playerStore = usePlayerStore();
 const { track, coverArt } = storeToRefs(playerStore);
