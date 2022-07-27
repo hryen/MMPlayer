@@ -10,7 +10,6 @@ const {
   trackDuration,
   coverArt,
   loopMode,
-  isFullPage,
 } = storeToRefs(playerStore);
 
 // 监听任务栏缩略图按钮事件
@@ -24,16 +23,6 @@ ipcRenderer.on("playPause", (event: any, arg: any) => {
 ipcRenderer.on("playNext", (event: any, arg: any) => {
   playerStore.playNext();
 });
-
-function toggleFullPage() {
-  isFullPage.value = !isFullPage.value;
-  // window.dispatchEvent(new Event("resize"));
-  if (isFullPage.value) {
-    ipcRenderer.send("set-thumbnail-clip", "lyric");
-  } else {
-    ipcRenderer.send("set-thumbnail-clip");
-  }
-}
 </script>
 
 <template>
@@ -48,7 +37,7 @@ function toggleFullPage() {
               : 'data:image/png;base64,' + coverArt
           "
           alt="Cover"
-          @click="toggleFullPage"
+          @click="playerStore.toggleLyricPage()"
         />
       </div>
       <div id="track-info">

@@ -21,7 +21,7 @@ const {
   playingPlayListIndex,
   playingTrackIndex,
   loopMode,
-  isFullPage,
+  lyricPageVisible,
 } = storeToRefs(playerStore);
 
 function quit() {
@@ -61,7 +61,7 @@ function quit() {
     </div>
     <div
       id="app-header__right"
-      :style="isFullPage ? 'background-color: #fbfcfe;' : ''"
+      :style="lyricPageVisible ? 'background-color: #fbfcfe;' : ''"
     >
       <!-- <div id="app-header__right_search">
         <input type="text" placeholder="Search" />

@@ -21,7 +21,7 @@ export const usePlayerStore = defineStore("player", {
 
     volumeInterval: null as any,
     trackCurrentTimeInterval: null as any,
-    isFullPage: false as boolean, // 显示歌词
+    lyricPageVisible: false as boolean, // 显示歌词页面
     lrcInterval: null as any,
     nextLrcIndex: 1 as number,
   }),
@@ -453,6 +453,7 @@ export const usePlayerStore = defineStore("player", {
       if (showingPlayListIndex.value !== this.playingPlayListIndex) {
         showingPlayListIndex.value = this.playingPlayListIndex;
       }
+      this.lyricPageVisible = false;
       window.location.href = href;
     },
 
@@ -499,7 +500,7 @@ export const usePlayerStore = defineStore("player", {
     },
 
     goToLyricsLine(line: number) {
-      if (!this.isFullPage) {
+      if (!this.lyricPageVisible) {
         return;
       }
 
@@ -585,6 +586,16 @@ export const usePlayerStore = defineStore("player", {
       this.track.lyricsList = lrcArray;
       this.nextLrcIndex = 1;
       this.goToLyricsLine(0);
+    },
+    toggleLyricPage() {
+      this.lyricPageVisible = !this.lyricPageVisible;
+      // window.dispatchEvent(new Event("resize"));
+      const { ipcRenderer } = require("electron");
+      if (this.lyricPageVisible) {
+        ipcRenderer.send("set-thumbnail-clip", "lyric");
+      } else {
+        ipcRenderer.send("set-thumbnail-clip");
+      }
     },
   },
 });

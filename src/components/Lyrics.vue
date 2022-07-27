@@ -2,11 +2,11 @@
 import { usePlayerStore } from "@/stores/player";
 import { storeToRefs } from "pinia";
 const playerStore = usePlayerStore();
-const { isFullPage, track, coverArt, nextLrcIndex } = storeToRefs(playerStore);
+const { lyricPageVisible, track, coverArt, nextLrcIndex } = storeToRefs(playerStore);
 </script>
 
 <template>
-  <div id="lyrics-container" v-show="isFullPage">
+  <div id="lyrics-container" v-show="lyricPageVisible">
     <div id="cover-container">
       <img
         id="cover"
