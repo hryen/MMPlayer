@@ -59,7 +59,14 @@ export const useLyricStore = defineStore("lyric", {
       this.showLyric(0);
     },
     toggleVisible() {
-      this.lyricPageVisible = !this.lyricPageVisible;
+      if (this.lyricPageVisible) {
+        this.lyricPageVisible = false;
+      } else {
+        this.lyricPageVisible = true;
+        setTimeout(() => {
+          this.seekLyric();
+        }, 300);
+      }
       // window.dispatchEvent(new Event("resize"));
     },
     startLyricInterval() {
