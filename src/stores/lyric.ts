@@ -51,8 +51,8 @@ export const useLyricStore = defineStore("lyric", {
         return;
       }
 
-      if (line >= 5) {
-        line -= 5;
+      if (line >= 3) {
+        line -= 3;
       } else {
         line = 0;
       }

@@ -108,6 +108,7 @@ const { track, coverArt } = storeToRefs(playerStore);
 
   text-align: center;
   width: 90%;
+  word-break: break-word;
 }
 #lyrics p.highlight {
   font-weight: bold;
