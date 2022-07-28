@@ -120,6 +120,7 @@ export const usePlayerStore = defineStore("player", {
         }
 
         this.getAndSetTrackInfo();
+        useLyricStore().getLyric();
       } catch (e: any) {
         console.error("读取保存的播放器设置失败");
         console.error(e);
@@ -138,6 +139,7 @@ export const usePlayerStore = defineStore("player", {
           }
 
           this.getAndSetTrackInfo();
+          useLyricStore().getLyric();
         }
       }
     },
@@ -286,6 +288,7 @@ export const usePlayerStore = defineStore("player", {
 
       // 设置歌曲信息
       this.getAndSetTrackInfo();
+      useLyricStore().getLyric();
     },
     playPause() {
       clearInterval(this.volumeInterval);
@@ -408,55 +411,6 @@ export const usePlayerStore = defineStore("player", {
       });
 
       // console.log(this.track);
-
-      // TODO: 读取歌词
-      const lrcArray = [];
-      const iconvlite = require("iconv-lite");
-      const fs = require("fs");
-      const { nextLyricIndex } = storeToRefs(useLyricStore());
-
-      let lrcPath = this.track.path;
-      lrcPath = lrcPath.substring(0, lrcPath.lastIndexOf(".")) + ".lrc";
-      lrcPath = lrcPath.replaceAll("\\", "/");
-      // console.log(lrcPath);
-
-      let lrcContent = "";
-      try {
-        const data = fs.readFileSync(lrcPath);
-        lrcContent = iconvlite.decode(data, "gbk");
-        // console.log(lrcContent);
-      } catch (err) {
-        this.track.lyrics = [{ time: 0, text: "未找到歌词文件" }];
-        nextLyricIndex.value = 1;
-        // console.error(err);
-        return;
-      }
-
-      const lrc = lrcContent.split("\n");
-      // console.log(lrc);
-      for (let i = 0; i < lrc.length; i++) {
-        let l = lrc[i];
-        if (l.match(/^\[.*?](\r)?$/)) {
-          continue;
-        }
-
-        let timeMatch = l.match(/\[(\d{2}):(\d{2})(\.|:)(\d+)]/);
-        if (timeMatch) {
-          let min = parseInt(timeMatch[1]);
-          let sec = parseInt(timeMatch[2]);
-          let ms = parseInt(timeMatch[4]);
-          const time = min * 60 + sec + ms / 1000;
-          let text = l.replace(/\[(\d{2}):(\d{2})(\.|:)(\d+)]/, "");
-          lrcArray.push({
-            time: time,
-            text: text.replaceAll("\r", ""),
-          });
-        }
-      }
-      this.track.lyrics = lrcArray;
-      // console.log(this.track.lyrics);
-      nextLyricIndex.value = 1;
-      useLyricStore().showLyric(0);
     },
   },
 });
