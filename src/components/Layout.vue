@@ -3,7 +3,7 @@ import Header from "@/components/Header.vue";
 import PlayList from "@/components/PlayList.vue";
 import TrackList from "@/components/TrackList.vue";
 import Player from "@/components/Player.vue";
-import Lyric from "@/components/Lyrics.vue";
+import Lyric from "@/components/Lyric.vue";
 </script>
 
 <template>
