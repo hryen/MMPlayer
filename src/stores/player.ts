@@ -426,7 +426,7 @@ export const usePlayerStore = defineStore("player", {
         lrcContent = iconvlite.decode(data, "gbk");
         // console.log(lrcContent);
       } catch (err) {
-        this.track.lyricsList = [{ time: 0, text: "未找到歌词文件" }];
+        this.track.lyrics = [{ time: 0, text: "未找到歌词文件" }];
         nextLyricIndex.value = 1;
         // console.error(err);
         return;
@@ -453,8 +453,8 @@ export const usePlayerStore = defineStore("player", {
           });
         }
       }
-      this.track.lyricsList = lrcArray;
-      // console.log(this.track.lyricsList);
+      this.track.lyrics = lrcArray;
+      // console.log(this.track.lyrics);
       nextLyricIndex.value = 1;
       useLyricStore().showLyric(0);
     },

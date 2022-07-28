@@ -26,12 +26,12 @@ const { track, coverArt } = storeToRefs(playerStore);
     <div
       id="lyrics"
       :style="
-        track.lyricsList && track.lyricsList.length === 1
+        track.lyrics && track.lyrics.length === 1
           ? 'justify-content:center'
           : ''
       "
     >
-      <template v-for="(item, index) in track.lyricsList">
+      <template v-for="(item, index) in track.lyrics">
         <!-- 显示11行歌词 -->
         <p
           :id="'lyric-' + index"

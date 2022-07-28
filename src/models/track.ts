@@ -3,10 +3,10 @@ export interface Track {
   artist: string;
   album: string;
   path: string;
-  lyricsList: Lyrics[];
+  lyrics: Lyric[];
 }
 
-export interface Lyrics {
+export interface Lyric {
   time: number;
   text: string;
 }

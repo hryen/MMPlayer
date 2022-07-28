@@ -24,8 +24,7 @@ export const useLyricStore = defineStore("lyric", {
       const playerStore = usePlayerStore();
       const { track, trackCurrentTime } = storeToRefs(playerStore);
 
-      // TODO: 改名 track.value.lyricsList -> track.value.lyrics
-      const lyrics = track.value.lyricsList;
+      const lyrics = track.value.lyrics;
       if (!lyrics || lyrics.length <= 1) {
         return;
       }
@@ -71,8 +70,7 @@ export const useLyricStore = defineStore("lyric", {
       const playerStore = usePlayerStore();
       const { track, trackCurrentTime } = storeToRefs(playerStore);
 
-      // TODO: 改名 track.value.lyricsList -> track.value.lyrics
-      const lyrics = track.value.lyricsList;
+      const lyrics = track.value.lyrics;
       if (!lyrics || lyrics.length <= 1) {
         return;
       }
