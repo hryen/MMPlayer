@@ -61,14 +61,6 @@ export const useLyricStore = defineStore("lyric", {
     toggleVisible() {
       this.lyricPageVisible = !this.lyricPageVisible;
       // window.dispatchEvent(new Event("resize"));
-
-      // TODO: 任务栏缩略图裁剪不准确，待放弃裁剪任务栏缩略图
-      const { ipcRenderer } = require("electron");
-      if (this.lyricPageVisible) {
-        ipcRenderer.send("set-thumbnail-clip", "lyric");
-      } else {
-        ipcRenderer.send("set-thumbnail-clip");
-      }
     },
     startLyricInterval() {
       const playerStore = usePlayerStore();

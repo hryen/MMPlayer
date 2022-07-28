@@ -73,26 +73,11 @@ app.whenReady().then(() => {
     mainWindow.show();
     mainWindow.webContents.send("rendered");
     setThumbarButtons(false);
-    mainWindow.setThumbnailClip({ x: 20, y: 658, width: 44, height: 44 });
   });
 
   app.on("activate", function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
-});
-
-// 设置任务栏缩略图 arg=lyric 为歌词界面
-ipcMain.on("set-thumbnail-clip", (event, arg) => {
-  if (arg === "lyric") {
-    mainWindow.setThumbnailClip({
-      x: 163,
-      y: 199,
-      width: 300,
-      height: 300,
-    });
-  } else {
-    mainWindow.setThumbnailClip({ x: 20, y: 658, width: 44, height: 44 });
-  }
 });
 
 app.on("window-all-closed", function () {
