@@ -1,5 +1,6 @@
 import { defineStore, storeToRefs } from "pinia";
 import { usePlayerStore } from "@/stores/player";
+import { nextTick } from "vue";
 
 export const useLyricStore = defineStore("lyric", {
   state: () => ({
@@ -63,9 +64,9 @@ export const useLyricStore = defineStore("lyric", {
         this.lyricPageVisible = false;
       } else {
         this.lyricPageVisible = true;
-        setTimeout(() => {
+        nextTick(() => {
           this.seekLyric();
-        }, 300);
+        });
       }
       // window.dispatchEvent(new Event("resize"));
     },
