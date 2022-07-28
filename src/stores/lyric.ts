@@ -100,20 +100,12 @@ export const useLyricStore = defineStore("lyric", {
         return;
       }
 
-      if (line >= 3) {
-        line -= 3;
-      } else {
-        line = 0;
-      }
-
-      const lyricsElement = document.getElementById("lyrics");
       const lyricElement = document.getElementById("lyric-" + line);
-      if (lyricsElement && lyricElement) {
-        const offsetParent = lyricElement.offsetParent as HTMLElement;
-        if (offsetParent) {
-          lyricsElement.scrollTop =
-            lyricElement.offsetTop + offsetParent.offsetTop - 120; // 一行的高度是40，减去3行的高度
-        }
+      if (lyricElement) {
+        lyricElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
       }
     },
     seekLyric() {
