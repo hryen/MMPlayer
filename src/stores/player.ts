@@ -241,7 +241,6 @@ export const usePlayerStore = defineStore("player", {
       // console.log("play");
       this.wavesurfer.cancelAjax();
 
-      // TODO:
       const mainStore = useMainStore();
       const { playLists, showingPlayListIndex } = storeToRefs(mainStore);
 
@@ -294,7 +293,6 @@ export const usePlayerStore = defineStore("player", {
       clearInterval(this.volumeInterval);
 
       // 如果是刚添加了第一个歌单，点了播放器的播放按钮，则播放第一首歌
-      // TODO:
       const mainStore = useMainStore();
       const { playLists, showingPlayListIndex } = storeToRefs(mainStore);
       if (!this.track.path) {
@@ -331,7 +329,6 @@ export const usePlayerStore = defineStore("player", {
       }
     },
     playNext() {
-      // TODO:
       const mainStore = useMainStore();
       const { playLists, showingPlayListIndex } = storeToRefs(mainStore);
 
@@ -378,7 +375,6 @@ export const usePlayerStore = defineStore("player", {
       const index = this.playingTrackIndex < 8 ? 0 : this.playingTrackIndex - 8;
       const href = "#track-" + this.playingPlayListIndex + "-" + index;
 
-      // TODO:
       const mainStore = useMainStore();
       const { showingPlayListIndex } = storeToRefs(mainStore);
 
