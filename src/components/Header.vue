@@ -4,6 +4,7 @@ import { usePlayerStore } from "@/stores/player";
 import { useLyricStore } from "@/stores/lyric";
 import { storeToRefs } from "pinia";
 import { PlayerSetting } from "@/models/playerSetting";
+import config from "@/config";
 
 const { ipcRenderer } = require("electron");
 const isMaximized = ref(false);
@@ -33,12 +34,8 @@ function quit() {
   };
   // console.log(JSON.stringify(setting));
   const fs = require("fs");
-  const path = require("path");
   try {
-    fs.writeFileSync(
-      path.resolve(process.cwd(), "playerSetting.json"),
-      JSON.stringify(setting)
-    );
+    fs.writeFileSync(config.PlayerSettingsFile, JSON.stringify(setting));
   } catch (err) {
     console.error("保存播放器设置失败", err);
     return;

@@ -2,6 +2,7 @@ import { useMainStore } from "@/stores/main";
 import { usePlayerStore } from "@/stores/player";
 import { storeToRefs } from "pinia";
 
+import config from "@/config";
 import { PlayList } from "@/models/playlist";
 import { Track } from "@/models/track";
 
@@ -16,10 +17,7 @@ function initPlaylists() {
   const playlists = [] as PlayList[];
   // find all playlists and tracks from db
   const fs = require("fs");
-  const path = require("path");
-  const filebuffer = fs.readFileSync(
-    path.resolve(process.cwd(), "tools", "data.db")
-  );
+  const filebuffer = fs.readFileSync(config.DatabaseFile);
   const initSqlJs = require("sql.js");
   initSqlJs().then(function (SQL: any) {
     // load the db
@@ -66,6 +64,10 @@ function initPlaylists() {
     const mainStore = useMainStore();
     const { playLists } = storeToRefs(mainStore);
     playLists.value = playlists;
-    console.log("读取播放列表数据完成, 用时", new Date().getTime() - start, "ms");
+    console.log(
+      "读取播放列表数据完成, 用时",
+      new Date().getTime() - start,
+      "ms"
+    );
   });
 }

@@ -1,15 +1,10 @@
+import config from "@/config";
 import { Track } from "@/models/track";
 
 export function walkDirectory(dirPath: string): Promise<Track[]> {
-  const path = require("path");
   const { exec } = require("child_process");
   const start = new Date().getTime();
-  const command =
-    '"' +
-    path.resolve(process.cwd(), "tools", "musicTool.exe") +
-    '" walk "' +
-    dirPath +
-    '"';
+  const command = '"' + config.MusicToolsFile + '" walk "' + dirPath + '"';
   return new Promise<Track[]>((resolve) => {
     exec(command, (_error: any, stdout: any, _stderr: any) => {
       try {
@@ -29,14 +24,13 @@ export function walkDirectory(dirPath: string): Promise<Track[]> {
   });
 }
 
-export function getPeakData(playListId: number, trackId: number): string {
+export function getPeakData(trackId: string): string {
   const path = require("path");
   const fs = require("fs");
   const peekFile = path.resolve(
     process.cwd(),
     "cache",
     "peak_data",
-    playListId+"",
     trackId + ".json"
   );
   return JSON.parse(fs.readFileSync(peekFile));

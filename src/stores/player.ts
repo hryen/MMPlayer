@@ -5,6 +5,7 @@ import { useLyricStore } from "@/stores/lyric";
 import { PlayerSetting } from "@/models/playerSetting";
 import { getPeakData } from "@/utils/musicTool";
 import { nextTick } from "vue";
+import config from "@/config";
 
 export const usePlayerStore = defineStore("player", {
   state: () => ({
@@ -88,14 +89,9 @@ export const usePlayerStore = defineStore("player", {
       this.wavesurfer.setVolume(0.8);
       // 读取保存的播放器设置
       try {
-        const path = require("path");
         const fs = require("fs");
-        const playerSettingFile = path.resolve(
-          process.cwd(),
-          "playerSetting.json"
-        );
         const playerSetting: PlayerSetting = JSON.parse(
-          fs.readFileSync(playerSettingFile)
+          fs.readFileSync(config.PlayerSettingsFile)
         );
 
         this.loopMode = playerSetting.loopMode;
@@ -130,10 +126,7 @@ export const usePlayerStore = defineStore("player", {
           this.track = playLists.value[0].tracks[0] || {};
 
           try {
-            const data = getPeakData(
-              this.playingPlayListIndex,
-              this.playingTrackIndex
-            );
+            const data = getPeakData(this.track.id);
             this.wavesurfer.load(this.track.path, data, "metadata");
           } catch (err) {
             this.wavesurfer.load(this.track.path);
@@ -196,8 +189,7 @@ export const usePlayerStore = defineStore("player", {
         process.cwd(),
         "cache",
         "peak_data",
-        this.playingPlayListIndex + "",
-        this.playingTrackIndex + ".json"
+        this.track.id + ".json"
       );
       // 如果文件不存在，则生成文件
       if (!fs.existsSync(peakFile)) {
@@ -275,10 +267,7 @@ export const usePlayerStore = defineStore("player", {
       // this.wavesurfer.load(this.track.path);
 
       try {
-        const data = getPeakData(
-          this.playingPlayListIndex,
-          this.playingTrackIndex
-        );
+        const data = getPeakData(this.track.id);
         this.wavesurfer.load(this.track.path, data, "metadata");
       } catch (err) {
         this.wavesurfer.load(this.track.path);
@@ -400,11 +389,7 @@ export const usePlayerStore = defineStore("player", {
       const { exec } = require("child_process");
 
       const command =
-        '"' +
-        path.resolve(process.cwd(), "tools", "musicTool.exe") +
-        '" cover "' +
-        this.track.path +
-        '"';
+        '"' + config.MusicToolsFile + '" cover "' + this.track.path + '"';
 
       exec(command, (_error: any, stdout: any, _stderr: any) => {
         if (stdout !== "") {
