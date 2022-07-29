@@ -12,6 +12,7 @@ ipcRenderer.on("rendered", (_event: any, _arg: any) => {
 });
 
 function initPlaylists() {
+  const start = new Date().getTime();
   const playlists = [] as PlayList[];
   // find all playlists and tracks from db
   const fs = require("fs");
@@ -65,5 +66,6 @@ function initPlaylists() {
     const mainStore = useMainStore();
     const { playLists } = storeToRefs(mainStore);
     playLists.value = playlists;
+    console.log("读取播放列表数据完成, 用时", new Date().getTime() - start, "ms");
   });
 }
