@@ -7,11 +7,11 @@ import { Track } from "@/models/track";
 
 const { ipcRenderer } = require("electron");
 ipcRenderer.on("rendered", (_event: any, _arg: any) => {
-  findAllPlaylist();
+  initPlaylists();
   usePlayerStore().init();
 });
 
-function findAllPlaylist() {
+function initPlaylists() {
   const playlists = [] as PlayList[];
   // find all playlists and tracks from db
   const fs = require("fs");
