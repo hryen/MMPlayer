@@ -3,8 +3,7 @@ dist
 dist-html
 node_modules
 
-playLists.json
-playerSetting.json
+PlayerSettings.json
 data.db
 
 0.TODO
