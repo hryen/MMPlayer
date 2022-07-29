@@ -3,7 +3,7 @@ import { usePlayerStore } from "@/stores/player";
 import { storeToRefs } from "pinia";
 
 import config from "@/config";
-import PlayList from "@/models/playlist";
+import Playlist from "@/models/playlist";
 import Track from "@/models/track";
 
 const { ipcRenderer } = require("electron");
@@ -15,7 +15,7 @@ ipcRenderer.on("rendered", async (_event: any, _arg: any) => {
 });
 
 async function initPlaylists() {
-  const playlists = [] as PlayList[];
+  const playlists = [] as Playlist[];
   // find all playlists and tracks from db
   const fs = require("fs");
   const filebuffer = fs.readFileSync(config.DatabaseFile);
@@ -28,7 +28,7 @@ async function initPlaylists() {
     const playlistStmt = db.prepare("SELECT * FROM playlist");
     while (playlistStmt.step()) {
       const obj = playlistStmt.getAsObject();
-      const playlist: PlayList = {
+      const playlist: Playlist = {
         id: obj.id,
         name: obj.name,
         path: obj.path,

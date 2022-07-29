@@ -128,7 +128,7 @@ ipcMain.on("dialogSaveFile", (event, arg) => {
 });
 
 // 删除歌单对话框，传入的是提示的消息内容，返回0代表确定，1代表取消
-ipcMain.on("dialogDeletePlayList", (event, arg) => {
+ipcMain.on("dialogDeletePlaylist", (event, arg) => {
   dialog
     .showMessageBox({
       type: "question",
@@ -138,7 +138,7 @@ ipcMain.on("dialogDeletePlayList", (event, arg) => {
       cancelId: 1,
     })
     .then((result) => {
-      event.reply("dialogDeletePlayList-reply", result.response);
+      event.reply("dialogDeletePlaylist-reply", result.response);
     });
 });
 
@@ -170,18 +170,18 @@ ipcMain.on("showTrackMenu", (event) => {
 });
 
 // 播放列表 右键菜单
-ipcMain.on("showPlayListMenu", (event) => {
+ipcMain.on("showPlaylistMenu", (event) => {
   const template = [
     {
       label: "在文件资源管理器中显示",
       click: () => {
-        event.sender.send("showPlayListMenu-reply", "locateInExplorer");
+        event.sender.send("showPlaylistMenu-reply", "locateInExplorer");
       },
     },
     {
       label: "删除",
       click: () => {
-        event.sender.send("showPlayListMenu-reply", "delete");
+        event.sender.send("showPlaylistMenu-reply", "delete");
       },
     },
   ];

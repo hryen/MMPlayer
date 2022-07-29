@@ -12,7 +12,7 @@ export const usePlayerStore = defineStore("player", {
     wavesurfer: null as any,
     volume: 80 as number,
     playingTrackIndex: 0 as number,
-    playingPlayListIndex: 0 as number,
+    playingPlaylistIndex: 0 as number,
     isPlaying: false as boolean,
 
     track: {} as Track,
@@ -96,10 +96,10 @@ export const usePlayerStore = defineStore("player", {
 
         this.loopMode = playerSetting.loopMode;
         if (playLists.value.length > 0) {
-          this.playingPlayListIndex = playerSetting.playingPlayListIndex;
+          this.playingPlaylistIndex = playerSetting.playingPlaylistIndex;
           this.playingTrackIndex = playerSetting.playingTrackIndex;
           this.track =
-            playLists.value[this.playingPlayListIndex].tracks[
+            playLists.value[this.playingPlaylistIndex].tracks[
               this.playingTrackIndex
             ];
 
@@ -230,38 +230,38 @@ export const usePlayerStore = defineStore("player", {
     setTrackCurrentTime() {
       this.trackCurrentTime = this.wavesurfer.getCurrentTime();
     },
-    play(trackIndex: number, playingPlayListIndex: number) {
+    play(trackIndex: number, playingPlaylistIndex: number) {
       // console.log("play");
       this.wavesurfer.cancelAjax();
 
       const mainStore = useMainStore();
-      const { playLists, showingPlayListIndex } = storeToRefs(mainStore);
+      const { playLists, showingPlaylistIndex } = storeToRefs(mainStore);
 
       // 记录上一首歌曲
       if (this.prevTrackArray.length !== 0) {
         const latestTrack = this.prevTrackArray[this.prevTrackArray.length - 1];
         if (
           trackIndex !== latestTrack.trackIndex ||
-          showingPlayListIndex.value !== latestTrack.playListIndex
+          showingPlaylistIndex.value !== latestTrack.playListIndex
         ) {
           this.prevTrackArray.push({
             trackIndex: trackIndex,
-            playListIndex: showingPlayListIndex.value,
+            playListIndex: showingPlaylistIndex.value,
           });
         }
       } else {
         this.prevTrackArray.push({
           trackIndex: trackIndex,
-          playListIndex: showingPlayListIndex.value,
+          playListIndex: showingPlaylistIndex.value,
         });
       }
       // console.log(this.prevTrackArray);
 
-      this.playingPlayListIndex = playingPlayListIndex;
+      this.playingPlaylistIndex = playingPlaylistIndex;
       this.playingTrackIndex = trackIndex;
 
       this.track =
-        playLists.value[this.playingPlayListIndex].tracks[
+        playLists.value[this.playingPlaylistIndex].tracks[
           this.playingTrackIndex
         ];
       // this.wavesurfer.load(this.track.path);
@@ -284,9 +284,9 @@ export const usePlayerStore = defineStore("player", {
 
       // 如果是刚添加了第一个歌单，点了播放器的播放按钮，则播放第一首歌
       const mainStore = useMainStore();
-      const { playLists, showingPlayListIndex } = storeToRefs(mainStore);
+      const { playLists, showingPlaylistIndex } = storeToRefs(mainStore);
       if (!this.track.path) {
-        this.track = playLists.value[showingPlayListIndex.value].tracks[0];
+        this.track = playLists.value[showingPlaylistIndex.value].tracks[0];
         this.wavesurfer.load(this.track.path);
       }
 
@@ -320,10 +320,10 @@ export const usePlayerStore = defineStore("player", {
     },
     playNext() {
       const mainStore = useMainStore();
-      const { playLists, showingPlayListIndex } = storeToRefs(mainStore);
+      const { playLists, showingPlaylistIndex } = storeToRefs(mainStore);
 
       const tracksLength =
-        playLists.value[showingPlayListIndex.value].tracks.length;
+        playLists.value[showingPlaylistIndex.value].tracks.length;
 
       if (this.loopMode === "shuffle") {
         this.playingTrackIndex = Math.floor(Math.random() * tracksLength);
@@ -335,7 +335,7 @@ export const usePlayerStore = defineStore("player", {
         }
       }
 
-      this.play(this.playingTrackIndex, this.playingPlayListIndex);
+      this.play(this.playingTrackIndex, this.playingPlaylistIndex);
     },
     playPrev() {
       // 是否需要改成：在随机播放模式下，记录上一首播放的歌曲，其他播放模式时就直接播放上一首
@@ -345,11 +345,11 @@ export const usePlayerStore = defineStore("player", {
         // console.log(prevTrack);
         if (prevTrack) {
           this.playingTrackIndex = prevTrack.trackIndex;
-          this.playingPlayListIndex = prevTrack.playListIndex;
-          this.play(this.playingTrackIndex, this.playingPlayListIndex);
+          this.playingPlaylistIndex = prevTrack.playListIndex;
+          this.play(this.playingTrackIndex, this.playingPlaylistIndex);
         }
       } else {
-        this.play(this.playingTrackIndex, this.playingPlayListIndex);
+        this.play(this.playingTrackIndex, this.playingPlaylistIndex);
       }
     },
     togglePlayMode() {
@@ -364,14 +364,14 @@ export const usePlayerStore = defineStore("player", {
     locatePlayingTrack() {
       useLyricStore().closeLyricPage();
 
-      const { showingPlayListIndex } = storeToRefs(useMainStore());
-      if (showingPlayListIndex.value !== this.playingPlayListIndex) {
-        showingPlayListIndex.value = this.playingPlayListIndex;
+      const { showingPlaylistIndex } = storeToRefs(useMainStore());
+      if (showingPlaylistIndex.value !== this.playingPlaylistIndex) {
+        showingPlaylistIndex.value = this.playingPlaylistIndex;
       }
 
       nextTick(() => {
         const tracklement = document.getElementById(
-          "track-" + this.playingPlayListIndex + "-" + this.playingTrackIndex
+          "track-" + this.playingPlaylistIndex + "-" + this.playingTrackIndex
         );
         if (tracklement) {
           tracklement.scrollIntoView({

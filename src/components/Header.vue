@@ -18,16 +18,16 @@ ipcRenderer.on("maximize-reply", (_event: String, arg: boolean) => {
 });
 
 const playerStore = usePlayerStore();
-const { trackCurrentTime, playingPlayListIndex, playingTrackIndex, loopMode } =
+const { trackCurrentTime, playingPlaylistIndex, playingTrackIndex, loopMode } =
   storeToRefs(playerStore);
 
 const lyricStore = useLyricStore();
 const { lyricPageVisible } = storeToRefs(lyricStore);
 function quit() {
   // 退出前先保存当前播放的歌曲、时间、歌曲列表、播放模式
-  // console.log(wavesurfer.value, playingPlayListIndex.value, playingTrackIndex.value, loopMode.value);
+  // console.log(wavesurfer.value, playingPlaylistIndex.value, playingTrackIndex.value, loopMode.value);
   const settings: PlayerSettings = {
-    playingPlayListIndex: playingPlayListIndex.value,
+    playingPlaylistIndex: playingPlaylistIndex.value,
     playingTrackIndex: playingTrackIndex.value,
     loopMode: loopMode.value,
     trackCurrentTime: trackCurrentTime.value,

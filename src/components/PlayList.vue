@@ -9,8 +9,8 @@ import Spin from "@/components/Spin.vue";
 const mainStore = useMainStore();
 const playerStore = usePlayerStore();
 
-const { playLists, showingPlayListIndex } = storeToRefs(mainStore);
-const { playingPlayListIndex, playingTrackIndex } = storeToRefs(playerStore);
+const { playLists, showingPlaylistIndex } = storeToRefs(mainStore);
+const { playingPlaylistIndex, playingTrackIndex } = storeToRefs(playerStore);
 
 const path = require("path");
 const fs = require("fs");
@@ -20,7 +20,7 @@ const playListsFile = path.resolve(process.cwd(), "playLists.json");
 
 const isLoading = ref(false);
 // 刷新所有歌单的歌曲
-async function refreshPlayList() {
+async function refreshPlaylist() {
   isLoading.value = true;
   for (let i = 0; i < playLists.value.length; i++) {
     const tracks = await walkDirectory(playLists.value[i].path);
@@ -28,7 +28,7 @@ async function refreshPlayList() {
   }
 
   // 保存歌单列表
-  writePlayListToFile(playListsFile);
+  writePlaylistToFile(playListsFile);
 
   // 删除缓存
   fs.rm(
@@ -47,11 +47,11 @@ async function refreshPlayList() {
 }
 
 // 添加歌单
-function addPlayList() {
+function addPlaylist() {
   ipcRenderer.send("dialogOpenDirectory", false);
 }
 ipcRenderer.on("dialogOpenDirectory-reply", async (event: any, arg: any) => {
-  // console.log("addPlayList", arg);
+  // console.log("addPlaylist", arg);
   if (!arg.canceled) {
     isLoading.value = true;
     const playList = {
@@ -65,60 +65,60 @@ ipcRenderer.on("dialogOpenDirectory-reply", async (event: any, arg: any) => {
 
     // 如果添加后只有一个歌单，则自动选中
     if (playLists.value.length === 1) {
-      playingPlayListIndex.value = 0;
+      playingPlaylistIndex.value = 0;
       playingTrackIndex.value = 0;
     }
 
     // 保存歌单列表
-    writePlayListToFile(playListsFile);
+    writePlaylistToFile(playListsFile);
     isLoading.value = false;
   }
 });
 
 // 删除歌单
-let willPlayListIndex = 0 as number;
-function showPlayListMenu(index: number) {
-  willPlayListIndex = index;
-  ipcRenderer.send("showPlayListMenu");
+let willPlaylistIndex = 0 as number;
+function showPlaylistMenu(index: number) {
+  willPlaylistIndex = index;
+  ipcRenderer.send("showPlaylistMenu");
 }
-ipcRenderer.on("showPlayListMenu-reply", (event: any, arg: any) =>
-  handlePlayListMenu(arg)
+ipcRenderer.on("showPlaylistMenu-reply", (event: any, arg: any) =>
+  handlePlaylistMenu(arg)
 );
-function handlePlayListMenu(arg: any) {
+function handlePlaylistMenu(arg: any) {
   switch (arg) {
     case "delete":
-      ipcRenderer.send("dialogDeletePlayList", "确定要删除该歌单吗？");
+      ipcRenderer.send("dialogDeletePlaylist", "确定要删除该歌单吗？");
       break;
     case "locateInExplorer":
-      shell.openPath(playLists.value[willPlayListIndex].path);
+      shell.openPath(playLists.value[willPlaylistIndex].path);
       break;
   }
 }
-ipcRenderer.on("dialogDeletePlayList-reply", (event: any, arg: any) => {
+ipcRenderer.on("dialogDeletePlaylist-reply", (event: any, arg: any) => {
   if (arg === 0) {
     // 如果正在播放的歌曲 在 要删除的歌单中
-    if (playingPlayListIndex.value === willPlayListIndex) {
-      playingPlayListIndex.value = 0;
+    if (playingPlaylistIndex.value === willPlaylistIndex) {
+      playingPlaylistIndex.value = 0;
       playingTrackIndex.value = 0;
     } else {
       // 如果正在播放的歌曲 在 要删除的歌单之前
-      if (playingPlayListIndex.value > willPlayListIndex) {
-        playingPlayListIndex.value--;
+      if (playingPlaylistIndex.value > willPlaylistIndex) {
+        playingPlaylistIndex.value--;
       }
     }
 
     // 如果正在显示的歌单是要删除的歌单
-    if (showingPlayListIndex.value === willPlayListIndex) {
-      showingPlayListIndex.value = 0;
+    if (showingPlaylistIndex.value === willPlaylistIndex) {
+      showingPlaylistIndex.value = 0;
     } else {
       // 如果正在显示的歌单 在 要删除的歌单之前
-      if (showingPlayListIndex.value > willPlayListIndex) {
-        showingPlayListIndex.value--;
+      if (showingPlaylistIndex.value > willPlaylistIndex) {
+        showingPlaylistIndex.value--;
       }
     }
 
-    playLists.value.splice(willPlayListIndex, 1);
-    writePlayListToFile(playListsFile);
+    playLists.value.splice(willPlaylistIndex, 1);
+    writePlaylistToFile(playListsFile);
   }
 
   // 删除缓存
@@ -126,7 +126,7 @@ ipcRenderer.on("dialogDeletePlayList-reply", (event: any, arg: any) => {
     process.cwd(),
     "cache",
     "peak_data",
-    willPlayListIndex + ""
+    willPlaylistIndex + ""
   );
   fs.rm(peakCacheDir, { recursive: true }, (err: any) => {
     if (err) {
@@ -136,7 +136,7 @@ ipcRenderer.on("dialogDeletePlayList-reply", (event: any, arg: any) => {
 });
 
 // 将歌单信息保存到文件中
-function writePlayListToFile(path: string) {
+function writePlaylistToFile(path: string) {
   const content = JSON.stringify(playLists.value);
   // console.log(content);
   fs.writeFile(path, content, (err: any) => {
@@ -148,13 +148,13 @@ function writePlayListToFile(path: string) {
   });
 }
 
-// function exportPlayList() {
+// function exportPlaylist() {
 //   ipcRenderer.send("dialogSaveFile");
 // }
 // ipcRenderer.on("dialogSaveFile-reply", (event: any, arg: any) => {
 //   if (!arg.canceled) {
 //     // console.log(arg);
-//     writePlayListToFile(arg.filePaths[0]);
+//     writePlaylistToFile(arg.filePaths[0]);
 //   }
 // });
 </script>
@@ -167,7 +167,7 @@ function writePlayListToFile(path: string) {
 
       <div style="display: flex; gap: 8px">
         <svg
-          @click="addPlayList"
+          @click="addPlaylist"
           class="left-menu__playlists-add"
           xmlns="http://www.w3.org/2000/svg"
           width="20px"
@@ -181,7 +181,7 @@ function writePlayListToFile(path: string) {
         </svg>
 
         <svg
-          @click="refreshPlayList"
+          @click="refreshPlaylist"
           class="left-menu__playlists-add"
           xmlns="http://www.w3.org/2000/svg"
           height="20px"
@@ -197,7 +197,7 @@ function writePlayListToFile(path: string) {
         </svg>
       </div>
       <!-- <svg
-          @click="exportPlayList"
+          @click="exportPlaylist"
           class="left-menu__playlists-add"
           xmlns="http://www.w3.org/2000/svg"
           height="20px"
@@ -213,14 +213,14 @@ function writePlayListToFile(path: string) {
     <div id="left-menu__playlists">
       <template v-for="(item, index) in playLists">
         <div
-          @contextmenu.prevent="showPlayListMenu(index)"
+          @contextmenu.prevent="showPlaylistMenu(index)"
           :id="'playlist-' + item.id"
           :title="item.path"
           :class="
             'playlist-title' +
-            (showingPlayListIndex === index ? ' playlist-active' : '')
+            (showingPlaylistIndex === index ? ' playlist-active' : '')
           "
-          @click="showingPlayListIndex = index"
+          @click="showingPlaylistIndex = index"
         >
           {{
             item.path.substring(

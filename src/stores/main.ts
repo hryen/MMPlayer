@@ -1,9 +1,9 @@
 import { defineStore } from "pinia";
-import { PlayList } from "@/models/playlist";
+import { Playlist } from "@/models/playlist";
 
 export const useMainStore = defineStore("main", {
   state: () => ({
-    playLists: [] as PlayList[],
-    showingPlayListIndex: 0 as number,
+    playLists: [] as Playlist[],
+    showingPlaylistIndex: 0 as number,
   }),
 });

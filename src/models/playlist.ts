@@ -1,10 +1,10 @@
 import Track from "@/models/track";
 
-export interface PlayList {
+export interface Playlist {
   id: string;
   name: string;
   path: string;
   tracks: Track[];
 }
 
-export default PlayList;
+export default Playlist;

@@ -4,17 +4,17 @@ import { usePlayerStore } from "@/stores/player";
 import { storeToRefs } from "pinia";
 
 const mainStore = useMainStore();
-const { playLists, showingPlayListIndex } = storeToRefs(mainStore);
+const { playLists, showingPlaylistIndex } = storeToRefs(mainStore);
 
 const playerStore = usePlayerStore();
-const { playingPlayListIndex, playingTrackIndex } = storeToRefs(playerStore);
+const { playingPlaylistIndex, playingTrackIndex } = storeToRefs(playerStore);
 
 const { ipcRenderer, shell } = require("electron");
 let willTrackIndex = 0 as number;
-let willPlayListIndex = 0 as number;
+let willPlaylistIndex = 0 as number;
 function showTrackMenu(trackIndex: number, playListIndex: number) {
   willTrackIndex = trackIndex;
-  willPlayListIndex = playListIndex;
+  willPlaylistIndex = playListIndex;
   ipcRenderer.send("showTrackMenu");
 }
 
@@ -24,11 +24,11 @@ ipcRenderer.on("showTrackMenu-reply", (event: any, arg: any) =>
 function handleTrackMenu(arg: any) {
   switch (arg) {
     case "play":
-      playerStore.play(willTrackIndex, willPlayListIndex);
+      playerStore.play(willTrackIndex, willPlaylistIndex);
       break;
     case "locateInExplorer":
       shell.showItemInFolder(
-        playLists.value[willPlayListIndex].tracks[willTrackIndex].path
+        playLists.value[willPlaylistIndex].tracks[willTrackIndex].path
       );
       break;
   }
@@ -36,8 +36,8 @@ function handleTrackMenu(arg: any) {
 
 // TODO: backToTop
 // function backToTop() {
-//   console.log("track-" + currentPlayListId + "-" + "0");
-//   window.location.href = "track-" + currentPlayListId + "-" + "0";
+//   console.log("track-" + currentPlaylistId + "-" + "0");
+//   window.location.href = "track-" + currentPlaylistId + "-" + "0";
 // }
 </script>
 
@@ -53,7 +53,7 @@ function handleTrackMenu(arg: any) {
     <template v-for="(playList, playListIndex) in playLists">
       <div
         :id="'track-list-' + playListIndex"
-        v-show="showingPlayListIndex === playListIndex"
+        v-show="showingPlaylistIndex === playListIndex"
       >
         <template v-if="playList.tracks.length === 0">
           <div style="text-align: center; font-size: 14px">
@@ -68,7 +68,7 @@ function handleTrackMenu(arg: any) {
             :id="'track-' + playListIndex + '-' + trackIndex"
             :class="
               'track' +
-              (playingPlayListIndex === playListIndex &&
+              (playingPlaylistIndex === playListIndex &&
               playingTrackIndex === trackIndex
                 ? ' track-active track-playing'
                 : '')
