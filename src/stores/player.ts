@@ -1,8 +1,8 @@
 import { defineStore, storeToRefs } from "pinia";
-import { Track } from "@/models/track";
+import Track from "@/models/track";
 import { useMainStore } from "@/stores/main";
 import { useLyricStore } from "@/stores/lyric";
-import { PlayerSetting } from "@/models/playerSetting";
+import PlayerSettings from "@/models/playerSettings";
 import { getPeakData } from "@/utils/musicTool";
 import { nextTick } from "vue";
 import config from "@/config";
@@ -90,7 +90,7 @@ export const usePlayerStore = defineStore("player", {
       // 读取保存的播放器设置
       try {
         const fs = require("fs");
-        const playerSetting: PlayerSetting = JSON.parse(
+        const playerSetting: PlayerSettings = JSON.parse(
           fs.readFileSync(config.PlayerSettingsFile)
         );
 

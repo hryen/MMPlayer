@@ -3,8 +3,8 @@ import { usePlayerStore } from "@/stores/player";
 import { storeToRefs } from "pinia";
 
 import config from "@/config";
-import { PlayList } from "@/models/playlist";
-import { Track } from "@/models/track";
+import PlayList from "@/models/playlist";
+import Track from "@/models/track";
 
 const { ipcRenderer } = require("electron");
 ipcRenderer.on("rendered", (_event: any, _arg: any) => {

@@ -1,4 +1,4 @@
-import { Track } from "@/models/track";
+import Track from "@/models/track";
 
 export interface PlayList {
   id: string;
@@ -6,3 +6,5 @@ export interface PlayList {
   path: string;
   tracks: Track[];
 }
+
+export default PlayList;

@@ -1,5 +1,5 @@
 import config from "@/config";
-import { Track } from "@/models/track";
+import Track from "@/models/track";
 
 export function walkDirectory(dirPath: string): Promise<Track[]> {
   const { exec } = require("child_process");
