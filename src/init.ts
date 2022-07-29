@@ -7,19 +7,20 @@ import PlayList from "@/models/playlist";
 import Track from "@/models/track";
 
 const { ipcRenderer } = require("electron");
-ipcRenderer.on("rendered", (_event: any, _arg: any) => {
-  initPlaylists();
+ipcRenderer.on("rendered", async (_event: any, _arg: any) => {
+  const start = new Date().getTime();
+  await initPlaylists();
   usePlayerStore().init();
+  console.log("初始化完成, 用时", new Date().getTime() - start, "ms");
 });
 
-function initPlaylists() {
-  const start = new Date().getTime();
+async function initPlaylists() {
   const playlists = [] as PlayList[];
   // find all playlists and tracks from db
   const fs = require("fs");
   const filebuffer = fs.readFileSync(config.DatabaseFile);
   const initSqlJs = require("sql.js");
-  initSqlJs().then(function (SQL: any) {
+  await initSqlJs().then(function (SQL: any) {
     // load the db
     const db = new SQL.Database(filebuffer);
 
@@ -64,10 +65,5 @@ function initPlaylists() {
     const mainStore = useMainStore();
     const { playLists } = storeToRefs(mainStore);
     playLists.value = playlists;
-    console.log(
-      "读取播放列表数据完成, 用时",
-      new Date().getTime() - start,
-      "ms"
-    );
   });
 }
