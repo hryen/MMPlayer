@@ -4,6 +4,7 @@ import { useMainStore } from "@/stores/main";
 import { useLyricStore } from "@/stores/lyric";
 import { PlayerSetting } from "@/models/playerSetting";
 import { getPeakData } from "@/utils/musicTool";
+import { nextTick } from "vue";
 
 export const usePlayerStore = defineStore("player", {
   state: () => ({
@@ -372,17 +373,24 @@ export const usePlayerStore = defineStore("player", {
       }
     },
     locatePlayingTrack() {
-      const index = this.playingTrackIndex < 8 ? 0 : this.playingTrackIndex - 8;
-      const href = "#track-" + this.playingPlayListIndex + "-" + index;
+      useLyricStore().closeLyricPage();
 
-      const mainStore = useMainStore();
-      const { showingPlayListIndex } = storeToRefs(mainStore);
-
+      const { showingPlayListIndex } = storeToRefs(useMainStore());
       if (showingPlayListIndex.value !== this.playingPlayListIndex) {
         showingPlayListIndex.value = this.playingPlayListIndex;
       }
-      useLyricStore().closeLyricPage();
-      window.location.href = href;
+
+      nextTick(() => {
+        const tracklement = document.getElementById(
+          "track-" + this.playingPlayListIndex + "-" + this.playingTrackIndex
+        );
+        if (tracklement) {
+          tracklement.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+      });
     },
 
     // 获取专辑封面、歌词，然后设置专辑封面、歌词
