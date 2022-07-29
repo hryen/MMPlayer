@@ -61,7 +61,7 @@ ipcRenderer.on("dialogOpenDirectory-reply", async (event: any, arg: any) => {
     };
     // 扫描歌曲
     playList.tracks = await walkDirectory(playList.path);
-    playLists.value.push(playList);
+    // playLists.value.push(playList);
 
     // 如果添加后只有一个歌单，则自动选中
     if (playLists.value.length === 1) {

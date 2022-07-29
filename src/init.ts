@@ -2,27 +2,68 @@ import { useMainStore } from "@/stores/main";
 import { usePlayerStore } from "@/stores/player";
 import { storeToRefs } from "pinia";
 
-const { ipcRenderer } = require("electron");
-ipcRenderer.on("rendered", (event: any, arg: any) => {
-  // init playlist
-  const mainStore = useMainStore();
-  const playerStore = usePlayerStore();
-  const path = require("path");
-  const playListsFile = path.resolve(process.cwd(), "playLists.json");
-  try {
-    const fs = require("fs");
-    const { playLists } = storeToRefs(mainStore);
-    const start = new Date().getTime();
-    playLists.value = JSON.parse(fs.readFileSync(playListsFile));
-    console.log("读取播放列表完成, 用时", new Date().getTime() - start, "ms");
-  } catch (err: any) {
-    if (err.code === "ENOENT") {
-      console.log(playListsFile + " not found");
-    } else {
-      console.error("读取已保存的播放列表时出错", err);
-    }
-  }
+import { PlayList } from "@/models/playlist";
+import { Track } from "@/models/track";
 
-  // init wavesurfer
-  playerStore.init();
+const { ipcRenderer } = require("electron");
+ipcRenderer.on("rendered", (_event: any, _arg: any) => {
+  findAllPlaylist();
+  usePlayerStore().init();
 });
+
+function findAllPlaylist() {
+  const playlists = [] as PlayList[];
+  // find all playlists and tracks from db
+  const fs = require("fs");
+  const path = require("path");
+  const filebuffer = fs.readFileSync(
+    path.resolve(process.cwd(), "tools", "data.db")
+  );
+  const initSqlJs = require("sql.js");
+  initSqlJs().then(function (SQL: any) {
+    // load the db
+    const db = new SQL.Database(filebuffer);
+
+    // find all the playlists
+    const playlistStmt = db.prepare("SELECT * FROM playlist");
+    while (playlistStmt.step()) {
+      const obj = playlistStmt.getAsObject();
+      const playlist: PlayList = {
+        id: obj.id,
+        name: obj.name,
+        path: obj.path,
+        tracks: [],
+      };
+      // console.log(playlist);
+
+      // find all the tracks
+      const tracks = [];
+      const trackStmt = db.prepare("SELECT * FROM track WHERE playlist_id=$id");
+      trackStmt.bind({ $id: playlist.id });
+      while (trackStmt.step()) {
+        const obj = trackStmt.getAsObject();
+        const track: Track = {
+          id: obj.id,
+          title: obj.title,
+          artist: obj.artist,
+          album: obj.album,
+          path: obj.path,
+          liked: obj.liked,
+          lyrics: [],
+        };
+        // console.log(track);
+        tracks.push(track);
+      }
+      trackStmt.free();
+
+      playlist.tracks = tracks;
+      playlists.push(playlist);
+    }
+    playlistStmt.free();
+    db.close();
+
+    const mainStore = useMainStore();
+    const { playLists } = storeToRefs(mainStore);
+    playLists.value = playlists;
+  });
+}
