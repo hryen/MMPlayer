@@ -358,6 +358,9 @@ export const usePlayerStore = defineStore("player", {
       // console.log(this.track);
     },
   },
+  getters: {
+    getTrack: (state) => state.track,
+  }
 });
 
 function shuffleArray(length: number) {

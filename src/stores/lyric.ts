@@ -69,10 +69,12 @@ export const useLyricStore = defineStore("lyric", {
       if (this.lyricPageVisible) {
         this.lyricPageVisible = false;
       } else {
-        this.lyricPageVisible = true;
-        nextTick(() => {
-          this.seekLyric();
-        });
+        if (usePlayerStore().getTrack.title) {
+          this.lyricPageVisible = true;
+          nextTick(() => {
+            this.seekLyric();
+          });
+        }
       }
       // window.dispatchEvent(new Event("resize"));
     },
