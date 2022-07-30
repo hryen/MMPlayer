@@ -44,6 +44,13 @@ function timeFormat(input: number) {
     seconds
   );
 }
+
+// TODO: 加载专辑图片失败就重新生成然后再加载，如果生成失败就用默认图片
+// img @error="handleThumbnailError"    还有歌词界面的也有修改
+function handleCoverArtError(e: any) {
+  // e.target.src = notFoundImgUrl;
+  // e.target.parentElement.classList.add("thumbnail-error");
+}
 </script>
 
 <template>
