@@ -8,6 +8,13 @@ const { lyricPageVisible, nextLyricIndex } = storeToRefs(lyricStore);
 
 const playerStore = usePlayerStore();
 const { track, coverArt } = storeToRefs(playerStore);
+
+// TODO: 加载图片失败就重新生成然后再加载，如果生成失败就用默认图片
+// img @error="handleThumbnailError"
+function handleCoverArtError(e: any) {
+  // e.target.src = notFoundImgUrl;
+  // e.target.parentElement.classList.add("thumbnail-error");
+}
 </script>
 
 <template>
