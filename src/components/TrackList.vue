@@ -38,6 +38,7 @@ function backToTop() {
 }
 </script>
 
+<!-- TODO: 加载歌曲时显示加载中 -->
 <template>
   <div id="track-lists">
     <div id="track-list__title" class="track">
@@ -62,7 +63,7 @@ function backToTop() {
           { 'track-active track-playing': track.id === item.id },
         ]"
       >
-      <!-- TODO: 如果是当前播放的歌曲，按钮显示为暂停 -->
+        <!-- TODO: 如果是当前播放的歌曲，按钮显示为暂停 -->
         <div @click="playerStore.playWithPlaylistId(index)" class="track-index">
           {{ index + 1 }}
         </div>

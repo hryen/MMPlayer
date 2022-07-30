@@ -1,6 +1,6 @@
 import config from "@/config";
 
-export async function walkDirectory(dirPath: string) {
+export async function walkDirectory(dirPath: string): Promise<string> {
   const util = require("node:util");
   const execFile = util.promisify(require("node:child_process").execFile);
   const { stdout, stderr } = await execFile(config.MusicToolsFile, [
@@ -8,9 +8,9 @@ export async function walkDirectory(dirPath: string) {
     dirPath,
   ]);
   if (stderr) {
-    console.error(stderr);
+    return Promise.reject(stderr);
   } else {
-    console.log(stdout);
+    return Promise.resolve(stdout);
   }
 }
 

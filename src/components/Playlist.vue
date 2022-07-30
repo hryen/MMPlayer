@@ -46,34 +46,22 @@ const isLoading = ref(false);
 // //   isLoading.value = false;
 // // }
 
-// // 添加歌单
-// function addPlaylist() {
-//   ipcRenderer.send("dialogOpenDirectory", false);
-// }
-// ipcRenderer.on("dialogOpenDirectory-reply", async (event: any, arg: any) => {
-//   // console.log("addPlaylist", arg);
-//   if (!arg.canceled) {
-//     isLoading.value = true;
-//     const playList = {
-//       id: playLists.value.length + 1,
-//       path: arg.filePaths[0].replaceAll("\\", "/"),
-//       tracks: [] as any,
-//     };
-//     // 扫描歌曲
-//     playList.tracks = await walkDirectory(playList.path);
-//     // playLists.value.push(playList);
-
-//     // 如果添加后只有一个歌单，则自动选中
-//     if (playLists.value.length === 1) {
-//       playingPlaylistIndex.value = 0;
-//       playingTrackIndex.value = 0;
-//     }
-
-//     // 保存歌单列表
-//     writePlaylistToFile(playListsFile);
-//     isLoading.value = false;
-//   }
-// });
+// 添加歌单
+function addPlaylist() {
+  ipcRenderer.send("dialogOpenDirectory", false);
+}
+ipcRenderer.on("dialogOpenDirectory-reply", async (_event: any, arg: any) => {
+  // console.log("addPlaylist", arg);
+  if (!arg.canceled) {
+    isLoading.value = true;
+    await walkDirectory(arg.filePaths[0].replaceAll("\\", "/")).catch(
+      (stderr: string) => {
+        console.error("添加歌单时出错", stderr);
+      }
+    );
+    isLoading.value = false;
+  }
+});
 
 // // 删除歌单
 // let willPlaylistIndex = 0 as number;
@@ -148,9 +136,27 @@ const isLoading = ref(false);
 //   });
 // }
 
-function showPlaylistMenu(index: string) {}
-function addPlaylist() {}
-function refreshPlaylist(){}
+// 右键菜单
+function showPlaylistMenu(id: string) {
+  ipcRenderer.send("showPlaylistMenu", id);
+}
+ipcRenderer.on(
+  "showPlaylistMenu-reply",
+  (_event: any, menu: string, id: string) => {
+    switch (menu) {
+      case "refresh":
+        // TODO: 刷新歌单
+        break;
+      case "locateInExplorer":
+        shell.showItemInFolder(playlists.value[id].path);
+        break;
+      case "delete":
+        // TODO: 删除歌单
+        break;
+    }
+  }
+);
+function refreshPlaylist() {}
 </script>
 
 <template>
