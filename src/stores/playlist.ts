@@ -20,7 +20,7 @@ export const usePlaylistStore = defineStore("playlist", {
         for (const playlist of playlists) {
           _playlists[playlist.id] = playlist;
         }
-        console.log("playlist init complete");
+        // console.log("playlist init complete");
       } catch (e) {
         console.error("playlist init error:", e);
       }
