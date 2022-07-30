@@ -1,3 +1,5 @@
+import Lyric from "./lyric";
+
 export interface Track {
   id: string;
   title: string;
@@ -6,11 +8,6 @@ export interface Track {
   path: string;
   liked: boolean;
   lyrics: Lyric[];
-}
-
-export interface Lyric {
-  time: number;
-  text: string;
 }
 
 export default Track;
