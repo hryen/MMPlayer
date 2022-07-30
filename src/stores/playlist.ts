@@ -15,11 +15,13 @@ export const usePlaylistStore = defineStore("playlist", {
   actions: {
     async init() {
       try {
+        const _playlists = {} as { [key: string]: Playlist };
         const playlists = await this.findPlaylists();
         for (const playlist of playlists) {
-          this.playlists[playlist.id] = playlist;
+          _playlists[playlist.id] = playlist;
         }
-        // console.log("playlist init complete");
+        this.playlists = _playlists;
+        console.log("playlist init complete");
       } catch (e) {
         console.error("playlist init error:", e);
       }

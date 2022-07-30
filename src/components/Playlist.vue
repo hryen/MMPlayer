@@ -19,32 +19,12 @@ const { ipcRenderer, shell } = require("electron");
 const playListsFile = path.resolve(process.cwd(), "playLists.json");
 
 const isLoading = ref(false);
-// // 刷新所有歌单的歌曲
-// // async function refreshPlaylist() {
-// //   isLoading.value = true;
-// //   for (let i = 0; i < playLists.value.length; i++) {
-// //     const tracks = await walkDirectory(playLists.value[i].path);
-// //     // playLists.value[i].tracks = tracks;
-// //   }
-
-// //   // 保存歌单列表
-// //   writePlaylistToFile(playListsFile);
-
-// //   // 删除缓存
-// //   fs.rm(
-// //     path.resolve(process.cwd(), "cache", "peak_data"),
-// //     { recursive: true },
-// //     (err: any) => {
-// //       if (err) {
-// //         console.error("删除 peak data 缓存时出错", err);
-// //       }
-// //     }
-// //   );
-
-// //   // TODO: 提示刷新完成
-// //   console.log("刷新歌单完成");
-// //   isLoading.value = false;
-// // }
+// 刷新歌单列表
+async function initPlaylist() {
+  isLoading.value = true;
+  await playlistStore.init();
+  isLoading.value = false;
+}
 
 // 添加歌单
 function addPlaylist() {
@@ -59,7 +39,7 @@ ipcRenderer.on("dialogOpenDirectory-reply", async (_event: any, arg: any) => {
         console.error("添加歌单时出错", stderr);
       }
     );
-    isLoading.value = false;
+    initPlaylist();
   }
 });
 
@@ -156,7 +136,6 @@ ipcRenderer.on(
     }
   }
 );
-function refreshPlaylist() {}
 </script>
 
 <template>
@@ -181,7 +160,7 @@ function refreshPlaylist() {}
         </svg>
 
         <svg
-          @click="refreshPlaylist"
+          @click="initPlaylist"
           class="left-menu__playlists-add"
           xmlns="http://www.w3.org/2000/svg"
           height="20px"
@@ -189,7 +168,7 @@ function refreshPlaylist() {}
           viewBox="0 0 24 24"
           fill="#4e5969"
         >
-          <title>重新扫描所有歌单</title>
+          <title>刷新歌单列表</title>
           <path d="M0 0h24v24H0z" fill="none" />
           <path
             d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"
