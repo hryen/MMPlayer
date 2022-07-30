@@ -68,6 +68,34 @@ export const usePlaylistStore = defineStore("playlist", {
       //   console.log("findTracksByPlaylistId:", new Date().getTime() - start, "ms");
       return Promise.resolve(tracks);
     },
+    async deletePlaylistById(playlistId: string) {
+      // console.log("deletePlaylistById", playlistId);
+      const sqlJs = require("sql.js");
+      try {
+        await sqlJs().then(function (SQL: any) {
+          const db = getDB(SQL);
+
+          db.exec("BEGIN;");
+
+          db.exec("DELETE FROM playlist WHERE id=$id;", {
+            $id: playlistId,
+          });
+
+          db.exec("DELETE FROM track WHERE playlist_id=$id;", {
+            $id: playlistId,
+          });
+
+          db.exec("COMMIT;");
+
+          const data = db.export();
+          db.close();
+
+          writeDB(data);
+        });
+      } catch (e) {
+        console.log("deletePlaylistById error:", e);
+      }
+    },
   },
 });
 
@@ -75,4 +103,10 @@ function getDB(SQL: any) {
   const fs = require("fs");
   const filebuffer = fs.readFileSync(config.DatabaseFile);
   return new SQL.Database(filebuffer);
+}
+
+function writeDB(data: any) {
+  const buffer = Buffer.from(data);
+  const fs = require("fs");
+  fs.writeFileSync(config.DatabaseFile, buffer);
 }

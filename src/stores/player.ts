@@ -357,6 +357,11 @@ export const usePlayerStore = defineStore("player", {
 
       // console.log(this.track);
     },
+    emptyTrackInfo() {
+      this.coverArt = "./assets/album_black_48dp.svg";
+      this.track.title = "";
+      this.track.artist = "";
+    }
   },
   getters: {
     getTrack: (state) => state.track,

@@ -12,7 +12,7 @@ const { playlists, showingPlaylistId } = storeToRefs(playlistStore);
 const { ipcRenderer, shell } = require("electron");
 
 const playerStore = usePlayerStore();
-const { playingPlaylistId, playingTrackIndex } = storeToRefs(playerStore);
+const { playingPlaylistId, wavesurfer } = storeToRefs(playerStore);
 
 const isLoading = ref(false);
 
@@ -46,23 +46,24 @@ ipcRenderer.on("dialogOpenDirectory-reply", async (_event: any, arg: any) => {
 });
 
 // 删除歌单
-ipcRenderer.on("dialogDeletePlaylist-reply", (_event: any, result: any, id: string) => {
-  if (result !== 0) return;
-  console.log("删除歌单", id);
-  // TODO: 从数据库中删除歌单以及歌曲
-  // TODO: 调用 usePlaylistStore 中的方法来删除歌单
+ipcRenderer.on(
+  "dialogDeletePlaylist-reply",
+  async (_event: any, result: any, id: string) => {
+    if (result !== 0) return;
+    // TODO: 从数据库中删除歌单以及歌曲
+    // TODO: 调用 usePlaylistStore 中的方法来删除歌单
+    await playlistStore.deletePlaylistById(id);
+    await initPlaylist();
+    if (playingPlaylistId.value === id) {
+      wavesurfer.value.empty();
+      playerStore.emptyTrackInfo();
+    }
 
-  //     // 如果正在播放的歌曲 在 要删除的歌单中
-  //     if (playingPlaylistIndex.value === willPlaylistIndex) {
-  //       playingPlaylistIndex.value = 0;
-  //       playingTrackIndex.value = 0;
-  //     } else {
-
-  //     // 如果正在显示的歌单是要删除的歌单
-  //     if (showingPlaylistIndex.value === willPlaylistIndex) {
-  //       showingPlaylistIndex.value = 0;
-  //     }
-});
+    if (showingPlaylistId.value === id) {
+      showingPlaylistId.value = Object.keys(playlists.value)[0];
+    }
+  }
+);
 
 // 右键菜单
 function showPlaylistMenu(id: string) {
@@ -79,7 +80,6 @@ ipcRenderer.on(
         shell.openPath(playlists.value[id].path);
         break;
       case "delete":
-        // TODO: 删除歌单
         ipcRenderer.send("dialogDeletePlaylist", id);
         break;
     }
