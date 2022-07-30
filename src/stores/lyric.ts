@@ -10,8 +10,8 @@ export const useLyricStore = defineStore("lyric", {
   }),
   actions: {
     getLyric() {
-      const playerStore = usePlayerStore();
-      const { track } = storeToRefs(playerStore);
+      const { track } = storeToRefs(usePlayerStore());
+      if (!track.value.path) return;
 
       let lyricFile = track.value.path;
       lyricFile = lyricFile.substring(0, lyricFile.lastIndexOf(".")) + ".lrc";
@@ -71,20 +71,15 @@ export const useLyricStore = defineStore("lyric", {
       // window.dispatchEvent(new Event("resize"));
     },
     startLyricInterval() {
-      const playerStore = usePlayerStore();
-      const { track, trackCurrentTime } = storeToRefs(playerStore);
+      const { track, trackCurrentTime } = storeToRefs(usePlayerStore());
 
       const lyrics = track.value.lyrics;
-      if (!lyrics || lyrics.length <= 1) {
-        return;
-      }
+      if (!lyrics || lyrics.length <= 1) return;
 
       const _this = this;
       this.lyricInterval = setInterval(function () {
         const l = lyrics[_this.nextLyricIndex];
-        if (_this.nextLyricIndex === lyrics.length) {
-          return;
-        }
+        if (_this.nextLyricIndex === lyrics.length) return;
 
         if (trackCurrentTime.value >= l.time) {
           _this.showLyric(_this.nextLyricIndex);
@@ -96,9 +91,7 @@ export const useLyricStore = defineStore("lyric", {
       clearInterval(this.lyricInterval);
     },
     showLyric(line: number) {
-      if (!this.lyricPageVisible) {
-        return;
-      }
+      if (!this.lyricPageVisible) return;
 
       const lyricElement = document.getElementById("lyric-" + line);
       if (lyricElement) {
@@ -109,13 +102,10 @@ export const useLyricStore = defineStore("lyric", {
       }
     },
     seekLyric() {
-      const playerStore = usePlayerStore();
-      const { track, trackCurrentTime } = storeToRefs(playerStore);
+      const { track, trackCurrentTime } = storeToRefs(usePlayerStore());
 
       const lyrics = track.value.lyrics;
-      if (!lyrics || lyrics.length <= 1) {
-        return;
-      }
+      if (!lyrics || lyrics.length <= 1) return;
 
       if (trackCurrentTime.value > lyrics[lyrics.length - 1].time) {
         this.nextLyricIndex = lyrics.length;

@@ -112,9 +112,6 @@ export const usePlayerStore = defineStore("player", {
           };
           this.wavesurfer.on("waveform-ready", seekToSaved);
         }
-
-        this.getAndSetTrackInfo();
-        useLyricStore().getLyric();
       } catch (e: any) {
         console.error("读取保存的播放器设置失败");
         console.error(e);
@@ -128,9 +125,6 @@ export const usePlayerStore = defineStore("player", {
         //   } catch (err) {
         //     this.wavesurfer.load(this.track.path);
         //   }
-
-        //   this.getAndSetTrackInfo();
-        //   useLyricStore().getLyric();
         // }
       }
 
@@ -246,10 +240,6 @@ export const usePlayerStore = defineStore("player", {
       }
 
       this.playPause();
-
-      // 设置歌曲信息
-      this.getAndSetTrackInfo();
-      useLyricStore().getLyric();
     },
     playWithPlaylistId(trackIndex: number) {
       const showingPlaylistId = usePlaylistStore().getShowingPlaylistId;
@@ -257,10 +247,6 @@ export const usePlayerStore = defineStore("player", {
       this.play(trackIndex);
     },
     playPause() {
-      if (!this.track) {
-        return;
-      }
-
       clearInterval(this.volumeInterval);
 
       if (this.wavesurfer.isPlaying()) {
@@ -353,8 +339,9 @@ export const usePlayerStore = defineStore("player", {
 
     // 获取专辑封面、歌词，然后设置专辑封面、歌词
     getAndSetTrackInfo() {
+      if (!this.track.path) return;
+
       // 设置专辑封面
-      const path = require("path");
       const { exec } = require("child_process");
 
       const command =

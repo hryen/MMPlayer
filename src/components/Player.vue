@@ -2,6 +2,7 @@
 import { usePlayerStore } from "@/stores/player";
 import { useLyricStore } from "@/stores/lyric";
 import { storeToRefs } from "pinia";
+import { watch } from "vue";
 
 const playerStore = usePlayerStore();
 const {
@@ -12,6 +13,10 @@ const {
   coverArt,
   loopMode,
 } = storeToRefs(playerStore);
+
+watch(track, () => {
+  playerStore.getAndSetTrackInfo();
+});
 
 const lyricStore = useLyricStore();
 

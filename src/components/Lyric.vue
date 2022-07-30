@@ -2,12 +2,17 @@
 import { useLyricStore } from "@/stores/lyric";
 import { usePlayerStore } from "@/stores/player";
 import { storeToRefs } from "pinia";
+import { watch } from "vue";
 
 const lyricStore = useLyricStore();
 const { lyricPageVisible, nextLyricIndex } = storeToRefs(lyricStore);
 
 const playerStore = usePlayerStore();
 const { track, coverArt } = storeToRefs(playerStore);
+
+watch(track, () => {
+  lyricStore.getLyric();
+});
 </script>
 
 <template>
