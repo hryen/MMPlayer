@@ -38,7 +38,7 @@ function quit() {
     fs.writeFileSync(config.PlayerSettingsFile, JSON.stringify(settings));
   } catch (err) {
     console.error("保存播放器设置失败", err);
-    return;
+    // return;
   }
 
   // 发送退出消息
