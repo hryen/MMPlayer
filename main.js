@@ -133,12 +133,12 @@ ipcMain.on("dialogDeletePlaylist", (event, arg) => {
     .showMessageBox({
       type: "question",
       title: "提示",
-      message: arg,
+      message: "确定要删除该歌单吗？",
       buttons: ["确定", "取消"],
       cancelId: 1,
     })
     .then((result) => {
-      event.reply("dialogDeletePlaylist-reply", result.response);
+      event.reply("dialogDeletePlaylist-reply", result.response, arg);
     });
 });
 

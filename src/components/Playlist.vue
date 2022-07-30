@@ -7,14 +7,12 @@ import { ref, nextTick } from "vue";
 import Spin from "@/components/Spin.vue";
 
 const playlistStore = usePlaylistStore();
-const playerStore = usePlayerStore();
-
 const { playlists, showingPlaylistId } = storeToRefs(playlistStore);
-const { playingPlaylistIndex, playingTrackIndex } = storeToRefs(playerStore);
 
-const path = require("path");
-const fs = require("fs");
 const { ipcRenderer, shell } = require("electron");
+
+const playerStore = usePlayerStore();
+const { playingPlaylistId, playingTrackIndex } = storeToRefs(playerStore);
 
 const isLoading = ref(false);
 
@@ -47,65 +45,24 @@ ipcRenderer.on("dialogOpenDirectory-reply", async (_event: any, arg: any) => {
   }
 });
 
-// // 删除歌单
-// let willPlaylistIndex = 0 as number;
-// function showPlaylistMenu(index: number) {
-//   willPlaylistIndex = index;
-//   ipcRenderer.send("showPlaylistMenu");
-// }
-// ipcRenderer.on("showPlaylistMenu-reply", (_event: any, arg: any) =>
-//   handlePlaylistMenu(arg)
-// );
-// function handlePlaylistMenu(arg: any) {
-//   switch (arg) {
-//     case "delete":
-//       ipcRenderer.send("dialogDeletePlaylist", "确定要删除该歌单吗？");
-//       break;
-//     case "locateInExplorer":
-//       shell.openPath(playLists.value[willPlaylistIndex].path);
-//       break;
-//   }
-// }
-// ipcRenderer.on("dialogDeletePlaylist-reply", (_event: any, arg: any) => {
-//   if (arg === 0) {
-//     // 如果正在播放的歌曲 在 要删除的歌单中
-//     if (playingPlaylistIndex.value === willPlaylistIndex) {
-//       playingPlaylistIndex.value = 0;
-//       playingTrackIndex.value = 0;
-//     } else {
-//       // 如果正在播放的歌曲 在 要删除的歌单之前
-//       if (playingPlaylistIndex.value > willPlaylistIndex) {
-//         playingPlaylistIndex.value--;
-//       }
-//     }
+// 删除歌单
+ipcRenderer.on("dialogDeletePlaylist-reply", (_event: any, result: any, id: string) => {
+  if (result !== 0) return;
+  console.log("删除歌单", id);
+  // TODO: 从数据库中删除歌单以及歌曲
+  // TODO: 调用 usePlaylistStore 中的方法来删除歌单
 
-//     // 如果正在显示的歌单是要删除的歌单
-//     if (showingPlaylistIndex.value === willPlaylistIndex) {
-//       showingPlaylistIndex.value = 0;
-//     } else {
-//       // 如果正在显示的歌单 在 要删除的歌单之前
-//       if (showingPlaylistIndex.value > willPlaylistIndex) {
-//         showingPlaylistIndex.value--;
-//       }
-//     }
+  //     // 如果正在播放的歌曲 在 要删除的歌单中
+  //     if (playingPlaylistIndex.value === willPlaylistIndex) {
+  //       playingPlaylistIndex.value = 0;
+  //       playingTrackIndex.value = 0;
+  //     } else {
 
-//     playLists.value.splice(willPlaylistIndex, 1);
-//     writePlaylistToFile(playListsFile);
-//   }
-
-//   // 删除缓存
-//   const peakCacheDir = path.resolve(
-//     process.cwd(),
-//     "cache",
-//     "peak_data",
-//     willPlaylistIndex + ""
-//   );
-//   fs.rm(peakCacheDir, { recursive: true }, (err: any) => {
-//     if (err) {
-//       console.error("删除 peak data 缓存时出错", err);
-//     }
-//   });
-// });
+  //     // 如果正在显示的歌单是要删除的歌单
+  //     if (showingPlaylistIndex.value === willPlaylistIndex) {
+  //       showingPlaylistIndex.value = 0;
+  //     }
+});
 
 // 右键菜单
 function showPlaylistMenu(id: string) {
@@ -123,6 +80,7 @@ ipcRenderer.on(
         break;
       case "delete":
         // TODO: 删除歌单
+        ipcRenderer.send("dialogDeletePlaylist", id);
         break;
     }
   }
@@ -166,18 +124,6 @@ ipcRenderer.on(
           />
         </svg>
       </div>
-      <!-- <svg
-          @click="exportPlaylist"
-          class="left-menu__playlists-add"
-          xmlns="http://www.w3.org/2000/svg"
-          height="20px"
-          viewBox="0 0 24 24"
-          width="20px"
-          fill="#4e5969"
-        ><title>导出歌单</title>
-          <path d="M0 0h24v24H0z" fill="none" />
-          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-        </svg> -->
     </div>
 
     <div id="left-menu__playlists">
