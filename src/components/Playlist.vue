@@ -50,8 +50,6 @@ ipcRenderer.on(
   "dialogDeletePlaylist-reply",
   async (_event: any, result: any, id: string) => {
     if (result !== 0) return;
-    // TODO: 从数据库中删除歌单以及歌曲
-    // TODO: 调用 usePlaylistStore 中的方法来删除歌单
     await playlistStore.deletePlaylistById(id);
     await initPlaylist();
     if (playingPlaylistId.value === id) {
