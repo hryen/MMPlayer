@@ -1,21 +1,24 @@
-import { defineStore, storeToRefs } from "pinia";
-import Track from "@/models/track";
-import { useMainStore } from "@/stores/main";
-import { useLyricStore } from "@/stores/lyric";
-import PlayerSettings from "@/models/playerSettings";
-import { getPeakData } from "@/utils/musicTool";
 import { nextTick } from "vue";
+import { defineStore, storeToRefs } from "pinia";
+
 import config from "@/config";
+import PlayerSettings from "@/models/playerSettings";
+import Track from "@/models/track";
+import { usePlaylistStore } from "@/stores/playlist";
+import { useLyricStore } from "@/stores/lyric";
+import { getPeakData } from "@/utils/musicTool";
 
 export const usePlayerStore = defineStore("player", {
   state: () => ({
     wavesurfer: null as any,
     volume: 80 as number,
-    playingTrackIndex: 0 as number,
-    playingPlaylistIndex: 0 as number,
+    volumeInterval: null as any,
     isPlaying: false as boolean,
 
-    track: {} as Track,
+    playingPlaylistId: "" as string,
+    playingTrackIndex: 0 as number,
+
+    track: {} as Track, // 待改名 track -> playingTrack
     trackDuration: 0 as number,
 
     trackCurrentTime: 0 as number,
@@ -25,14 +28,9 @@ export const usePlayerStore = defineStore("player", {
     loopMode: "repeat" as string, // repeat, repeatOne, shuffle
     prevTrackArray: [] as PrevTrack[],
     shuffledTrackIndexArray: [] as number[], // 暂时没用
-
-    volumeInterval: null as any,
   }),
   actions: {
     init() {
-      const mainStore = useMainStore();
-      const { playLists } = storeToRefs(mainStore);
-
       const WaveSurfer = require("wavesurfer.js");
       WaveSurfer.cursor = require("wavesurfer.js/dist/plugin/wavesurfer.cursor");
 
@@ -95,13 +93,12 @@ export const usePlayerStore = defineStore("player", {
         );
 
         this.loopMode = playerSetting.loopMode;
-        if (playLists.value.length > 0) {
-          this.playingPlaylistIndex = playerSetting.playingPlaylistIndex;
+        const playlists = usePlaylistStore().getPlaylists;
+        if (Object.values(playlists).length > 0) {
+          this.playingPlaylistId = playerSetting.playingPlaylistId;
           this.playingTrackIndex = playerSetting.playingTrackIndex;
           this.track =
-            playLists.value[this.playingPlaylistIndex].tracks[
-              this.playingTrackIndex
-            ];
+            playlists[this.playingPlaylistId].tracks[this.playingTrackIndex];
 
           this.wavesurfer.load(this.track.path);
           const that = this;
@@ -122,20 +119,22 @@ export const usePlayerStore = defineStore("player", {
         console.error("读取保存的播放器设置失败");
         console.error(e);
         // 加载第一个列表中的第一首歌曲，不播放
-        if (playLists.value.length > 0) {
-          this.track = playLists.value[0].tracks[0] || {};
+        // if (Object.values(playlists).length > 0) {
+        //   this.track = playLists.value[0].tracks[0] || {};
 
-          try {
-            const data = getPeakData(this.track.id);
-            this.wavesurfer.load(this.track.path, data, "metadata");
-          } catch (err) {
-            this.wavesurfer.load(this.track.path);
-          }
+        //   try {
+        //     const data = getPeakData(this.track.id);
+        //     this.wavesurfer.load(this.track.path, data, "metadata");
+        //   } catch (err) {
+        //     this.wavesurfer.load(this.track.path);
+        //   }
 
-          this.getAndSetTrackInfo();
-          useLyricStore().getLyric();
-        }
+        //   this.getAndSetTrackInfo();
+        //   useLyricStore().getLyric();
+        // }
       }
+
+      // console.log("wavesurfer init complete");
     },
     handleOnPlay() {
       this.isPlaying = true;
@@ -230,41 +229,14 @@ export const usePlayerStore = defineStore("player", {
     setTrackCurrentTime() {
       this.trackCurrentTime = this.wavesurfer.getCurrentTime();
     },
-    play(trackIndex: number, playingPlaylistIndex: number) {
+    play(trackIndex: number) {
       // console.log("play");
       this.wavesurfer.cancelAjax();
 
-      const mainStore = useMainStore();
-      const { playLists, showingPlaylistIndex } = storeToRefs(mainStore);
+      const playlists = usePlaylistStore().getPlaylists;
 
-      // 记录上一首歌曲
-      if (this.prevTrackArray.length !== 0) {
-        const latestTrack = this.prevTrackArray[this.prevTrackArray.length - 1];
-        if (
-          trackIndex !== latestTrack.trackIndex ||
-          showingPlaylistIndex.value !== latestTrack.playListIndex
-        ) {
-          this.prevTrackArray.push({
-            trackIndex: trackIndex,
-            playListIndex: showingPlaylistIndex.value,
-          });
-        }
-      } else {
-        this.prevTrackArray.push({
-          trackIndex: trackIndex,
-          playListIndex: showingPlaylistIndex.value,
-        });
-      }
-      // console.log(this.prevTrackArray);
-
-      this.playingPlaylistIndex = playingPlaylistIndex;
       this.playingTrackIndex = trackIndex;
-
-      this.track =
-        playLists.value[this.playingPlaylistIndex].tracks[
-          this.playingTrackIndex
-        ];
-      // this.wavesurfer.load(this.track.path);
+      this.track = playlists[this.playingPlaylistId].tracks[trackIndex];
 
       try {
         const data = getPeakData(this.track.id);
@@ -272,23 +244,24 @@ export const usePlayerStore = defineStore("player", {
       } catch (err) {
         this.wavesurfer.load(this.track.path);
       }
-      //   this.wavesurfer.play();
+
       this.playPause();
 
       // 设置歌曲信息
       this.getAndSetTrackInfo();
       useLyricStore().getLyric();
     },
+    playWithPlaylistId(trackIndex: number) {
+      const showingPlaylistId = usePlaylistStore().getShowingPlaylistId;
+      this.playingPlaylistId = showingPlaylistId;
+      this.play(trackIndex);
+    },
     playPause() {
-      clearInterval(this.volumeInterval);
-
-      // 如果是刚添加了第一个歌单，点了播放器的播放按钮，则播放第一首歌
-      const mainStore = useMainStore();
-      const { playLists, showingPlaylistIndex } = storeToRefs(mainStore);
-      if (!this.track.path) {
-        this.track = playLists.value[showingPlaylistIndex.value].tracks[0];
-        this.wavesurfer.load(this.track.path);
+      if (!this.track) {
+        return;
       }
+
+      clearInterval(this.volumeInterval);
 
       if (this.wavesurfer.isPlaying()) {
         this.isPlaying = false; // 立即改变按钮
@@ -319,38 +292,36 @@ export const usePlayerStore = defineStore("player", {
       }
     },
     playNext() {
-      const mainStore = useMainStore();
-      const { playLists, showingPlaylistIndex } = storeToRefs(mainStore);
+      const playlists = usePlaylistStore().getPlaylists;
 
-      const tracksLength =
-        playLists.value[showingPlaylistIndex.value].tracks.length;
+      const length = playlists[this.playingPlaylistId].tracks.length;
 
       if (this.loopMode === "shuffle") {
-        this.playingTrackIndex = Math.floor(Math.random() * tracksLength);
+        this.playingTrackIndex = Math.floor(Math.random() * length);
         // this.shuffledTrackIndexArray = shuffleArray(tracksLength);
       } else {
         this.playingTrackIndex++;
-        if (this.playingTrackIndex > tracksLength - 1) {
+        if (this.playingTrackIndex > length - 1) {
           this.playingTrackIndex = 0;
         }
       }
 
-      this.play(this.playingTrackIndex, this.playingPlaylistIndex);
+      this.play(this.playingTrackIndex);
     },
     playPrev() {
-      // 是否需要改成：在随机播放模式下，记录上一首播放的歌曲，其他播放模式时就直接播放上一首
-      this.prevTrackArray.pop();
-      if (this.prevTrackArray.length >= 1) {
-        const prevTrack = this.prevTrackArray.pop();
-        // console.log(prevTrack);
-        if (prevTrack) {
-          this.playingTrackIndex = prevTrack.trackIndex;
-          this.playingPlaylistIndex = prevTrack.playListIndex;
-          this.play(this.playingTrackIndex, this.playingPlaylistIndex);
-        }
-      } else {
-        this.play(this.playingTrackIndex, this.playingPlaylistIndex);
-      }
+      // TODO: 1.记录之前播放的歌曲索引，2.切换播放列表后清空，3.记录为空的时候播放当前索引-1的歌曲，如果当前索引为0，则播放最后一首歌曲
+      // this.prevTrackArray.pop();
+      // if (this.prevTrackArray.length >= 1) {
+      //   const prevTrack = this.prevTrackArray.pop();
+      //   // console.log(prevTrack);
+      //   if (prevTrack) {
+      //     this.playingTrackIndex = prevTrack.trackIndex;
+      //     this.playingPlaylistIndex = prevTrack.playListIndex;
+      //     this.play(this.playingTrackIndex, this.playingPlaylistIndex);
+      //   }
+      // } else {
+      //   this.play(this.playingTrackIndex, this.playingPlaylistIndex);
+      // }
     },
     togglePlayMode() {
       if (this.loopMode === "repeat") {
@@ -364,14 +335,12 @@ export const usePlayerStore = defineStore("player", {
     locatePlayingTrack() {
       useLyricStore().closeLyricPage();
 
-      const { showingPlaylistIndex } = storeToRefs(useMainStore());
-      if (showingPlaylistIndex.value !== this.playingPlaylistIndex) {
-        showingPlaylistIndex.value = this.playingPlaylistIndex;
-      }
+      const { showingPlaylistId } = storeToRefs(usePlaylistStore());
+      showingPlaylistId.value = this.playingPlaylistId;
 
       nextTick(() => {
         const tracklement = document.getElementById(
-          "track-" + this.playingPlaylistIndex + "-" + this.playingTrackIndex
+          "track-" + this.playingTrackIndex
         );
         if (tracklement) {
           tracklement.scrollIntoView({

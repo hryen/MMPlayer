@@ -18,7 +18,7 @@ ipcRenderer.on("maximize-reply", (_event: String, arg: boolean) => {
 });
 
 const playerStore = usePlayerStore();
-const { trackCurrentTime, playingPlaylistIndex, playingTrackIndex, loopMode } =
+const { trackCurrentTime, playingPlaylistId, playingTrackIndex, loopMode } =
   storeToRefs(playerStore);
 
 const lyricStore = useLyricStore();
@@ -27,7 +27,7 @@ function quit() {
   // 退出前先保存当前播放的歌曲、时间、歌曲列表、播放模式
   // console.log(wavesurfer.value, playingPlaylistIndex.value, playingTrackIndex.value, loopMode.value);
   const settings: PlayerSettings = {
-    playingPlaylistIndex: playingPlaylistIndex.value,
+    playingPlaylistId: playingPlaylistId.value,
     playingTrackIndex: playingTrackIndex.value,
     loopMode: loopMode.value,
     trackCurrentTime: trackCurrentTime.value,

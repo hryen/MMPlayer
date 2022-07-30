@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { useMainStore } from "@/stores/main";
+import { usePlaylistStore } from "@/stores/playlist";
 import { usePlayerStore } from "@/stores/player";
 import { storeToRefs } from "pinia";
 import { walkDirectory } from "@/utils/musicTool";
 import { ref } from "vue";
 import Spin from "@/components/Spin.vue";
 
-const mainStore = useMainStore();
+const playlistStore = usePlaylistStore();
 const playerStore = usePlayerStore();
 
-const { playLists, showingPlaylistIndex } = storeToRefs(mainStore);
+const { playlists, showingPlaylistId } = storeToRefs(playlistStore);
 const { playingPlaylistIndex, playingTrackIndex } = storeToRefs(playerStore);
 
 const path = require("path");
@@ -19,144 +19,138 @@ const { ipcRenderer, shell } = require("electron");
 const playListsFile = path.resolve(process.cwd(), "playLists.json");
 
 const isLoading = ref(false);
-// 刷新所有歌单的歌曲
-async function refreshPlaylist() {
-  isLoading.value = true;
-  for (let i = 0; i < playLists.value.length; i++) {
-    const tracks = await walkDirectory(playLists.value[i].path);
-    playLists.value[i].tracks = tracks;
-  }
+// // 刷新所有歌单的歌曲
+// // async function refreshPlaylist() {
+// //   isLoading.value = true;
+// //   for (let i = 0; i < playLists.value.length; i++) {
+// //     const tracks = await walkDirectory(playLists.value[i].path);
+// //     // playLists.value[i].tracks = tracks;
+// //   }
 
-  // 保存歌单列表
-  writePlaylistToFile(playListsFile);
+// //   // 保存歌单列表
+// //   writePlaylistToFile(playListsFile);
 
-  // 删除缓存
-  fs.rm(
-    path.resolve(process.cwd(), "cache", "peak_data"),
-    { recursive: true },
-    (err: any) => {
-      if (err) {
-        console.error("删除 peak data 缓存时出错", err);
-      }
-    }
-  );
+// //   // 删除缓存
+// //   fs.rm(
+// //     path.resolve(process.cwd(), "cache", "peak_data"),
+// //     { recursive: true },
+// //     (err: any) => {
+// //       if (err) {
+// //         console.error("删除 peak data 缓存时出错", err);
+// //       }
+// //     }
+// //   );
 
-  // TODO: 提示刷新完成
-  console.log("刷新歌单完成");
-  isLoading.value = false;
-}
+// //   // TODO: 提示刷新完成
+// //   console.log("刷新歌单完成");
+// //   isLoading.value = false;
+// // }
 
-// 添加歌单
-function addPlaylist() {
-  ipcRenderer.send("dialogOpenDirectory", false);
-}
-ipcRenderer.on("dialogOpenDirectory-reply", async (event: any, arg: any) => {
-  // console.log("addPlaylist", arg);
-  if (!arg.canceled) {
-    isLoading.value = true;
-    const playList = {
-      id: playLists.value.length + 1,
-      path: arg.filePaths[0].replaceAll("\\", "/"),
-      tracks: [] as any,
-    };
-    // 扫描歌曲
-    playList.tracks = await walkDirectory(playList.path);
-    // playLists.value.push(playList);
-
-    // 如果添加后只有一个歌单，则自动选中
-    if (playLists.value.length === 1) {
-      playingPlaylistIndex.value = 0;
-      playingTrackIndex.value = 0;
-    }
-
-    // 保存歌单列表
-    writePlaylistToFile(playListsFile);
-    isLoading.value = false;
-  }
-});
-
-// 删除歌单
-let willPlaylistIndex = 0 as number;
-function showPlaylistMenu(index: number) {
-  willPlaylistIndex = index;
-  ipcRenderer.send("showPlaylistMenu");
-}
-ipcRenderer.on("showPlaylistMenu-reply", (event: any, arg: any) =>
-  handlePlaylistMenu(arg)
-);
-function handlePlaylistMenu(arg: any) {
-  switch (arg) {
-    case "delete":
-      ipcRenderer.send("dialogDeletePlaylist", "确定要删除该歌单吗？");
-      break;
-    case "locateInExplorer":
-      shell.openPath(playLists.value[willPlaylistIndex].path);
-      break;
-  }
-}
-ipcRenderer.on("dialogDeletePlaylist-reply", (event: any, arg: any) => {
-  if (arg === 0) {
-    // 如果正在播放的歌曲 在 要删除的歌单中
-    if (playingPlaylistIndex.value === willPlaylistIndex) {
-      playingPlaylistIndex.value = 0;
-      playingTrackIndex.value = 0;
-    } else {
-      // 如果正在播放的歌曲 在 要删除的歌单之前
-      if (playingPlaylistIndex.value > willPlaylistIndex) {
-        playingPlaylistIndex.value--;
-      }
-    }
-
-    // 如果正在显示的歌单是要删除的歌单
-    if (showingPlaylistIndex.value === willPlaylistIndex) {
-      showingPlaylistIndex.value = 0;
-    } else {
-      // 如果正在显示的歌单 在 要删除的歌单之前
-      if (showingPlaylistIndex.value > willPlaylistIndex) {
-        showingPlaylistIndex.value--;
-      }
-    }
-
-    playLists.value.splice(willPlaylistIndex, 1);
-    writePlaylistToFile(playListsFile);
-  }
-
-  // 删除缓存
-  const peakCacheDir = path.resolve(
-    process.cwd(),
-    "cache",
-    "peak_data",
-    willPlaylistIndex + ""
-  );
-  fs.rm(peakCacheDir, { recursive: true }, (err: any) => {
-    if (err) {
-      console.error("删除 peak data 缓存时出错", err);
-    }
-  });
-});
-
-// 将歌单信息保存到文件中
-function writePlaylistToFile(path: string) {
-  const content = JSON.stringify(playLists.value);
-  // console.log(content);
-  fs.writeFile(path, content, (err: any) => {
-    if (err) {
-      console.error("保存播放列表失败", err);
-      return;
-    }
-    console.log("保存播放列表成功");
-  });
-}
-
-// function exportPlaylist() {
-//   ipcRenderer.send("dialogSaveFile");
+// // 添加歌单
+// function addPlaylist() {
+//   ipcRenderer.send("dialogOpenDirectory", false);
 // }
-// ipcRenderer.on("dialogSaveFile-reply", (event: any, arg: any) => {
+// ipcRenderer.on("dialogOpenDirectory-reply", async (event: any, arg: any) => {
+//   // console.log("addPlaylist", arg);
 //   if (!arg.canceled) {
-//     // console.log(arg);
-//     writePlaylistToFile(arg.filePaths[0]);
+//     isLoading.value = true;
+//     const playList = {
+//       id: playLists.value.length + 1,
+//       path: arg.filePaths[0].replaceAll("\\", "/"),
+//       tracks: [] as any,
+//     };
+//     // 扫描歌曲
+//     playList.tracks = await walkDirectory(playList.path);
+//     // playLists.value.push(playList);
+
+//     // 如果添加后只有一个歌单，则自动选中
+//     if (playLists.value.length === 1) {
+//       playingPlaylistIndex.value = 0;
+//       playingTrackIndex.value = 0;
+//     }
+
+//     // 保存歌单列表
+//     writePlaylistToFile(playListsFile);
+//     isLoading.value = false;
 //   }
 // });
+
+// // 删除歌单
+// let willPlaylistIndex = 0 as number;
+// function showPlaylistMenu(index: number) {
+//   willPlaylistIndex = index;
+//   ipcRenderer.send("showPlaylistMenu");
+// }
+// ipcRenderer.on("showPlaylistMenu-reply", (_event: any, arg: any) =>
+//   handlePlaylistMenu(arg)
+// );
+// function handlePlaylistMenu(arg: any) {
+//   switch (arg) {
+//     case "delete":
+//       ipcRenderer.send("dialogDeletePlaylist", "确定要删除该歌单吗？");
+//       break;
+//     case "locateInExplorer":
+//       shell.openPath(playLists.value[willPlaylistIndex].path);
+//       break;
+//   }
+// }
+// ipcRenderer.on("dialogDeletePlaylist-reply", (_event: any, arg: any) => {
+//   if (arg === 0) {
+//     // 如果正在播放的歌曲 在 要删除的歌单中
+//     if (playingPlaylistIndex.value === willPlaylistIndex) {
+//       playingPlaylistIndex.value = 0;
+//       playingTrackIndex.value = 0;
+//     } else {
+//       // 如果正在播放的歌曲 在 要删除的歌单之前
+//       if (playingPlaylistIndex.value > willPlaylistIndex) {
+//         playingPlaylistIndex.value--;
+//       }
+//     }
+
+//     // 如果正在显示的歌单是要删除的歌单
+//     if (showingPlaylistIndex.value === willPlaylistIndex) {
+//       showingPlaylistIndex.value = 0;
+//     } else {
+//       // 如果正在显示的歌单 在 要删除的歌单之前
+//       if (showingPlaylistIndex.value > willPlaylistIndex) {
+//         showingPlaylistIndex.value--;
+//       }
+//     }
+
+//     playLists.value.splice(willPlaylistIndex, 1);
+//     writePlaylistToFile(playListsFile);
+//   }
+
+//   // 删除缓存
+//   const peakCacheDir = path.resolve(
+//     process.cwd(),
+//     "cache",
+//     "peak_data",
+//     willPlaylistIndex + ""
+//   );
+//   fs.rm(peakCacheDir, { recursive: true }, (err: any) => {
+//     if (err) {
+//       console.error("删除 peak data 缓存时出错", err);
+//     }
+//   });
+// });
+
+// // 将歌单信息保存到文件中
+// function writePlaylistToFile(path: string) {
+//   const content = JSON.stringify(playLists.value);
+//   // console.log(content);
+//   fs.writeFile(path, content, (err: any) => {
+//     if (err) {
+//       console.error("保存播放列表失败", err);
+//       return;
+//     }
+//     console.log("保存播放列表成功");
+//   });
+// }
+
+function showPlaylistMenu(index: string) {}
+function addPlaylist() {}
+function refreshPlaylist(){}
 </script>
 
 <template>
@@ -211,23 +205,18 @@ function writePlaylistToFile(path: string) {
     </div>
 
     <div id="left-menu__playlists">
-      <template v-for="(item, index) in playLists">
+      <template v-for="item in playlists">
         <div
-          @contextmenu.prevent="showPlaylistMenu(index)"
+          @contextmenu.prevent="showPlaylistMenu(item.id)"
           :id="'playlist-' + item.id"
           :title="item.path"
-          :class="
-            'playlist-title' +
-            (showingPlaylistIndex === index ? ' playlist-active' : '')
-          "
-          @click="showingPlaylistIndex = index"
+          :class="[
+            'playlist-title',
+            { 'playlist-active': showingPlaylistId === item.id },
+          ]"
+          @click="showingPlaylistId = item.id"
         >
-          {{
-            item.path.substring(
-              item.path.lastIndexOf("/") + 1,
-              item.path.length
-            )
-          }}
+          {{ item.name !== "" ? item.name : item.path }}
         </div>
       </template>
     </div>

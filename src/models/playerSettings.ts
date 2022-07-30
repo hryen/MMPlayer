@@ -1,5 +1,5 @@
 export interface PlayerSettings {
-  playingPlaylistIndex: number;
+  playingPlaylistId: string;
   playingTrackIndex: number;
   loopMode: string;
   trackCurrentTime: number;

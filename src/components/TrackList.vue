@@ -1,44 +1,41 @@
 <script setup lang="ts">
-import { useMainStore } from "@/stores/main";
-import { usePlayerStore } from "@/stores/player";
 import { storeToRefs } from "pinia";
+import { usePlaylistStore } from "@/stores/playlist";
+import { usePlayerStore } from "@/stores/player";
 
-const mainStore = useMainStore();
-const { playLists, showingPlaylistIndex } = storeToRefs(mainStore);
+const { playlists, showingPlaylistId } = storeToRefs(usePlaylistStore());
 
 const playerStore = usePlayerStore();
-const { playingPlaylistIndex, playingTrackIndex } = storeToRefs(playerStore);
+const { track } = storeToRefs(playerStore);
 
+// 右键菜单
 const { ipcRenderer, shell } = require("electron");
-let willTrackIndex = 0 as number;
-let willPlaylistIndex = 0 as number;
-function showTrackMenu(trackIndex: number, playListIndex: number) {
-  willTrackIndex = trackIndex;
-  willPlaylistIndex = playListIndex;
-  ipcRenderer.send("showTrackMenu");
+function showTrackMenu(index: number) {
+  ipcRenderer.send("showTrackMenu", index);
 }
-
-ipcRenderer.on("showTrackMenu-reply", (event: any, arg: any) =>
-  handleTrackMenu(arg)
-);
-function handleTrackMenu(arg: any) {
-  switch (arg) {
-    case "play":
-      playerStore.play(willTrackIndex, willPlaylistIndex);
-      break;
-    case "locateInExplorer":
-      shell.showItemInFolder(
-        playLists.value[willPlaylistIndex].tracks[willTrackIndex].path
-      );
-      break;
+ipcRenderer.on(
+  "showTrackMenu-reply",
+  (_event: any, menu: string, index: number) => {
+    switch (menu) {
+      case "play":
+        playerStore.playWithPlaylistId(index);
+        break;
+      case "locateInExplorer":
+        shell.showItemInFolder(
+          playlists.value[showingPlaylistId.value].tracks[index].path
+        );
+        break;
+    }
   }
-}
+);
 
 // TODO: backToTop
-// function backToTop() {
-//   console.log("track-" + currentPlaylistId + "-" + "0");
-//   window.location.href = "track-" + currentPlaylistId + "-" + "0";
-// }
+function backToTop() {
+  const firstElement = document.getElementById("track-0");
+  if (firstElement) {
+    firstElement.scrollIntoView();
+  }
+}
 </script>
 
 <template>
@@ -50,47 +47,40 @@ function handleTrackMenu(arg: any) {
       <div class="track-album">专辑</div>
     </div>
 
-    <template v-for="(playList, playListIndex) in playLists">
+    <template
+      v-if="
+        playlists[showingPlaylistId] &&
+        playlists[showingPlaylistId].tracks.length > 0
+      "
+    >
       <div
-        :id="'track-list-' + playListIndex"
-        v-show="showingPlaylistIndex === playListIndex"
+        v-for="(item, index) in playlists[showingPlaylistId].tracks"
+        @contextmenu.prevent="showTrackMenu(index)"
+        :id="'track-' + index"
+        :class="[
+          'track',
+          { 'track-active track-playing': track.id === item.id },
+        ]"
       >
-        <template v-if="playList.tracks.length === 0">
-          <div style="text-align: center; font-size: 14px">
-            该列表没有扫描到歌曲
-          </div>
-        </template>
+      <!-- TODO: 如果是当前播放的歌曲，按钮显示为暂停 -->
+        <div @click="playerStore.playWithPlaylistId(index)" class="track-index">
+          {{ index + 1 }}
+        </div>
+        <div class="track-title" :title="item.title">
+          {{ item.title }}
+        </div>
+        <div class="track-artist" :title="item.artist">
+          {{ item.artist }}
+        </div>
+        <div class="track-album" :title="item.album">
+          {{ item.album }}
+        </div>
+      </div>
+    </template>
 
-        <template v-else>
-          <div
-            @contextmenu.prevent="showTrackMenu(trackIndex, playListIndex)"
-            v-for="(track, trackIndex) in playList.tracks"
-            :id="'track-' + playListIndex + '-' + trackIndex"
-            :class="
-              'track' +
-              (playingPlaylistIndex === playListIndex &&
-              playingTrackIndex === trackIndex
-                ? ' track-active track-playing'
-                : '')
-            "
-          >
-            <div
-              @click="playerStore.play(trackIndex, playListIndex)"
-              class="track-index"
-            >
-              {{ trackIndex + 1 }}
-            </div>
-            <div class="track-title" :title="track.title">
-              {{ track.title }}
-            </div>
-            <div class="track-artist" :title="track.artist">
-              {{ track.artist }}
-            </div>
-            <div class="track-album" :title="track.album">
-              {{ track.album }}
-            </div>
-          </div>
-        </template>
+    <template v-else>
+      <div style="text-align: center; font-size: 14px">
+        该列表没有扫描到歌曲
       </div>
     </template>
   </div>

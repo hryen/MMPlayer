@@ -1,27 +1,17 @@
 import config from "@/config";
-import Track from "@/models/track";
 
-export function walkDirectory(dirPath: string): Promise<Track[]> {
-  const { exec } = require("child_process");
-  const start = new Date().getTime();
-  const command = '"' + config.MusicToolsFile + '" walk "' + dirPath + '"';
-  return new Promise<Track[]>((resolve) => {
-    exec(command, (_error: any, stdout: any, _stderr: any) => {
-      try {
-        console.log(
-          dirPath,
-          "WalkDirectory完成, 用时",
-          new Date().getTime() - start,
-          "ms"
-        );
-        resolve(JSON.parse(stdout));
-      } catch (err) {
-        console.log("walkDirectory 出错了", err); // TODO: 提示用户
-        console.log("stdout", stdout);
-        resolve([]);
-      }
-    });
-  });
+export async function walkDirectory(dirPath: string) {
+  const util = require("node:util");
+  const execFile = util.promisify(require("node:child_process").execFile);
+  const { stdout, stderr } = await execFile(config.MusicToolsFile, [
+    "walk",
+    dirPath,
+  ]);
+  if (stderr) {
+    console.error(stderr);
+  } else {
+    console.log(stdout);
+  }
 }
 
 export function getPeakData(trackId: string): string {

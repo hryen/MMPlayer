@@ -143,27 +143,20 @@ ipcMain.on("dialogDeletePlaylist", (event, arg) => {
 });
 
 // 歌曲 右键菜单
-ipcMain.on("showTrackMenu", (event) => {
+ipcMain.on("showTrackMenu", (event, arg) => {
   const template = [
     {
       label: "播放",
       click: () => {
-        event.sender.send("showTrackMenu-reply", "play");
+        event.sender.send("showTrackMenu-reply", "play", arg);
       },
     },
     {
       label: "在文件资源管理器中显示",
       click: () => {
-        event.sender.send("showTrackMenu-reply", "locateInExplorer");
+        event.sender.send("showTrackMenu-reply", "locateInExplorer", arg);
       },
     },
-    // { type: "separator" },
-    // {
-    //   label: "删除",
-    //   click: () => {
-    //     event.sender.send("showTrackMenu-reply", "delete");
-    //   },
-    // },
   ];
   const menu = Menu.buildFromTemplate(template);
   menu.popup(BrowserWindow.fromWebContents(event.sender));
