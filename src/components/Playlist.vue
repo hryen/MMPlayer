@@ -23,10 +23,10 @@ async function initPlaylist() {
   isLoading.value = true;
   await playlistStore.init();
   nextTick(() => {
-    // 延迟半秒，防止闪屏
+    // 延迟关闭，防止闪屏
     setTimeout(() => {
       isLoading.value = false;
-    }, 500);
+    }, 300);
   });
 }
 
