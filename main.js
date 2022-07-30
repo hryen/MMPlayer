@@ -189,6 +189,6 @@ ipcMain.on("showPlaylistMenu", (event, arg) => {
 });
 
 // 点击了播放或暂停按钮，更新任务栏缩略图按钮的图标
-ipcMain.on("changePlayStatus", (event, arg) => {
+ipcMain.on("changePlayStatus", (_event, arg) => {
   setThumbarButtons(arg);
 });

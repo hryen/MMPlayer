@@ -3,7 +3,7 @@ import { usePlaylistStore } from "@/stores/playlist";
 import { usePlayerStore } from "@/stores/player";
 import { storeToRefs } from "pinia";
 import { walkDirectory } from "@/utils/musicTool";
-import { ref } from "vue";
+import { ref, nextTick } from "vue";
 import Spin from "@/components/Spin.vue";
 
 const playlistStore = usePlaylistStore();
@@ -16,14 +16,18 @@ const path = require("path");
 const fs = require("fs");
 const { ipcRenderer, shell } = require("electron");
 
-const playListsFile = path.resolve(process.cwd(), "playLists.json");
-
 const isLoading = ref(false);
+
 // 刷新歌单列表
 async function initPlaylist() {
   isLoading.value = true;
   await playlistStore.init();
-  isLoading.value = false;
+  nextTick(() => {
+    // 延迟半秒，防止闪屏
+    setTimeout(() => {
+      isLoading.value = false;
+    }, 500);
+  });
 }
 
 // 添加歌单
@@ -103,19 +107,6 @@ ipcRenderer.on("dialogOpenDirectory-reply", async (_event: any, arg: any) => {
 //   });
 // });
 
-// // 将歌单信息保存到文件中
-// function writePlaylistToFile(path: string) {
-//   const content = JSON.stringify(playLists.value);
-//   // console.log(content);
-//   fs.writeFile(path, content, (err: any) => {
-//     if (err) {
-//       console.error("保存播放列表失败", err);
-//       return;
-//     }
-//     console.log("保存播放列表成功");
-//   });
-// }
-
 // 右键菜单
 function showPlaylistMenu(id: string) {
   ipcRenderer.send("showPlaylistMenu", id);
@@ -125,10 +116,10 @@ ipcRenderer.on(
   (_event: any, menu: string, id: string) => {
     switch (menu) {
       case "refresh":
-        // TODO: 刷新歌单
+        // TODO: 重新扫描该歌单
         break;
       case "locateInExplorer":
-        shell.showItemInFolder(playlists.value[id].path);
+        shell.openPath(playlists.value[id].path);
         break;
       case "delete":
         // TODO: 删除歌单
