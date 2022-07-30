@@ -23,12 +23,18 @@ export const useLyricStore = defineStore("lyric", {
         const fs = require("fs");
         const iconvlite = require("iconv-lite");
         const data = fs.readFileSync(lyricFile);
-        lyricContent = iconvlite.decode(data, "gbk");
+        const chardet = require("chardet");
+        const encoding = chardet.detect(data);
+        lyricContent = iconvlite.decode(data, encoding);
         // console.log(lyricContent);
-      } catch (err) {
-        track.value.lyrics = [{ time: 0, text: "未找到歌词文件" }];
+      } catch (err: any) {
+        if (err.code === "ENOENT") {
+          track.value.lyrics = [{ time: 0, text: "未找到歌词文件" }];
+        } else {
+          track.value.lyrics = [{ time: 0, text: "加载歌词文件出错" }];
+          console.error(err);
+        }
         this.nextLyricIndex = 1;
-        // console.error(err);
         return;
       }
 
