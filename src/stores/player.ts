@@ -6,7 +6,7 @@ import PlayerSettings from "@/models/playerSettings";
 import Track from "@/models/track";
 import { usePlaylistStore } from "@/stores/playlist";
 import { useLyricStore } from "@/stores/lyric";
-import { getPeakData } from "@/utils/musicTool";
+import { getPeakData, exportImage } from "@/utils/musicTool";
 
 export const usePlayerStore = defineStore("player", {
   state: () => ({
@@ -24,7 +24,7 @@ export const usePlayerStore = defineStore("player", {
     trackCurrentTime: 0 as number,
     trackCurrentTimeInterval: null as any,
 
-    coverArt: "./assets/album_black_48dp.svg" as string,
+    trackCoverImage: config.defaultCoverImage as string,
     loopMode: "repeat" as string, // repeat, repeatOne, shuffle
     prevTrackArray: [] as PrevTrack[],
     shuffledTrackIndexArray: [] as number[], // 暂时没用
@@ -337,35 +337,21 @@ export const usePlayerStore = defineStore("player", {
       });
     },
 
-    // 获取专辑封面、歌词，然后设置专辑封面、歌词
-    getAndSetTrackInfo() {
-      if (!this.track.path) return;
-
-      // 设置专辑封面
-      const { exec } = require("child_process");
-
-      const command =
-        '"' + config.MusicToolsFile + '" cover "' + this.track.path + '"';
-
-      exec(command, (_error: any, stdout: any, _stderr: any) => {
-        if (stdout !== "") {
-          this.coverArt = stdout;
-        } else {
-          this.coverArt = "./assets/album_black_48dp.svg";
-        }
-      });
-
-      // console.log(this.track);
-    },
     emptyTrackInfo() {
-      this.coverArt = "./assets/album_black_48dp.svg";
+      this.trackCoverImage = config.defaultCoverImage;
       this.track.title = "";
       this.track.artist = "";
-    }
+    },
+    handleImageError(e: any) {
+      e.target.src = config.defaultCoverImage;
+      exportImage(this.track.path, this.trackCoverImage).then(() => {
+        e.target.src = this.trackCoverImage;
+      });
+    },
   },
   getters: {
     getTrack: (state) => state.track,
-  }
+  },
 });
 
 function shuffleArray(length: number) {

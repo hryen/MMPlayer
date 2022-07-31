@@ -13,6 +13,8 @@ const config = {
     "tools",
     "musicTool.exe"
   ) as string,
+
+  defaultCoverImage: "./assets/album_black_48dp.svg" as string,
 };
 
 export default config;

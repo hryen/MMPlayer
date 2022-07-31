@@ -7,15 +7,21 @@ import { watch } from "vue";
 const playerStore = usePlayerStore();
 const {
   track,
+  trackCoverImage,
   isPlaying,
   trackCurrentTime,
   trackDuration,
-  coverArt,
   loopMode,
 } = storeToRefs(playerStore);
 
 watch(track, () => {
-  playerStore.getAndSetTrackInfo();
+  const path = require("path");
+  trackCoverImage.value = path.resolve(
+    process.cwd(),
+    "cache",
+    "export_image",
+    track.value.id + ".jpg"
+  );
 });
 
 const lyricStore = useLyricStore();
@@ -49,13 +55,6 @@ function timeFormat(input: number) {
     seconds
   );
 }
-
-// TODO: 加载专辑图片失败就重新生成然后再加载，如果生成失败就用默认图片
-// img @error="handleThumbnailError"    还有歌词界面的也有修改
-function handleCoverArtError(e: any) {
-  // e.target.src = notFoundImgUrl;
-  // e.target.parentElement.classList.add("thumbnail-error");
-}
 </script>
 
 <template>
@@ -64,11 +63,8 @@ function handleCoverArtError(e: any) {
       <div id="track-cover">
         <img
           id="track-cover__img"
-          :src="
-            coverArt.startsWith('.')
-              ? coverArt
-              : 'data:image/png;base64,' + coverArt
-          "
+          :src="trackCoverImage"
+          @error="playerStore.handleImageError"
           alt="Cover"
           @click="lyricStore.toggleVisible()"
         />

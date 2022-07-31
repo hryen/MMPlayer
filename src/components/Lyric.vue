@@ -8,7 +8,7 @@ const lyricStore = useLyricStore();
 const { lyricPageVisible, nextLyricIndex } = storeToRefs(lyricStore);
 
 const playerStore = usePlayerStore();
-const { track, coverArt } = storeToRefs(playerStore);
+const { track, trackCoverImage } = storeToRefs(playerStore);
 
 watch(track, () => {
   lyricStore.getLyric();
@@ -20,11 +20,8 @@ watch(track, () => {
     <div id="cover-container">
       <img
         id="cover"
-        :src="
-          coverArt.startsWith('.')
-            ? coverArt
-            : 'data:image/png;base64,' + coverArt
-        "
+          :src="trackCoverImage"
+          @error="playerStore.handleImageError"
         alt="Cover"
       />
     </div>
