@@ -136,7 +136,8 @@ ipcRenderer.on(
           ]"
           @click="showingPlaylistId = item.id"
         >
-          {{ item.name !== "" ? item.name : item.path }}
+          <!-- {{ item.name !== "" ? item.name : item.path }} -->
+          {{ item.path.substring(item.path.lastIndexOf("/") + 1) }}
         </div>
       </template>
     </div>
