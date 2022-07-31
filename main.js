@@ -172,7 +172,7 @@ ipcMain.on("showPlaylistMenu", (event, arg) => {
       },
     },
     {
-      label: "在文件资源管理器中显示",
+      label: "打开目录",
       click: () => {
         event.sender.send("showPlaylistMenu-reply", "locateInExplorer", arg);
       },

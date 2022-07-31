@@ -75,7 +75,7 @@ ipcRenderer.on(
         // TODO: 重新扫描该歌单
         break;
       case "locateInExplorer":
-        shell.showItemInFolder(playlists.value[id].path.replaceAll("/", "\\"))
+        shell.openPath(playlists.value[id].path);
         break;
       case "delete":
         ipcRenderer.send("dialogDeletePlaylist", id);
