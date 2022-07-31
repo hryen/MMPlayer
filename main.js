@@ -166,7 +166,7 @@ ipcMain.on("showTrackMenu", (event, arg) => {
 ipcMain.on("showPlaylistMenu", (event, arg) => {
   const template = [
     {
-      label: "重新扫描歌曲",
+      label: "重新扫描该文件夹",
       click: () => {
         event.sender.send("showPlaylistMenu-reply", "refresh", arg);
       },
