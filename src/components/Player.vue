@@ -12,6 +12,7 @@ const {
   trackCurrentTime,
   trackDuration,
   loopMode,
+  playingPlaylistId,
 } = storeToRefs(playerStore);
 
 watch(track, () => {
@@ -22,6 +23,9 @@ watch(track, () => {
     "export_image",
     track.value.id + ".jpg"
   );
+});
+watch(playingPlaylistId, () => {
+  if (loopMode.value == "shuffle") playerStore.shufflePlayingPlaylistArray();
 });
 
 const lyricStore = useLyricStore();

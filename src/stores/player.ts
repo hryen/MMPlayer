@@ -26,8 +26,9 @@ export const usePlayerStore = defineStore("player", {
 
     trackCoverImage: config.defaultCoverImage as string,
     loopMode: "repeat" as string, // repeat, repeatOne, shuffle
-    prevTrackArray: [] as PrevTrack[],
-    shuffledTrackIndexArray: [] as number[], // 暂时没用
+
+    shuffledTrackIndexArray: [] as number[],
+    shuffledPlayingTrackIndex: 0 as number,
   }),
   actions: {
     init() {
@@ -281,39 +282,47 @@ export const usePlayerStore = defineStore("player", {
       const playlists = usePlaylistStore().getPlaylists;
 
       const length = playlists[this.playingPlaylistId].tracks.length;
-
-      if (this.loopMode === "shuffle") {
-        this.playingTrackIndex = Math.floor(Math.random() * length);
-        // this.shuffledTrackIndexArray = shuffleArray(tracksLength);
-      } else {
-        this.playingTrackIndex++;
-        if (this.playingTrackIndex > length - 1) {
-          this.playingTrackIndex = 0;
-        }
+      let nextTrackIndex = this.playingTrackIndex + 1;
+      if (nextTrackIndex > length - 1) {
+        nextTrackIndex = 0;
       }
 
-      this.play(this.playingTrackIndex);
+      if (this.loopMode === "shuffle") {
+        this.shuffledPlayingTrackIndex++;
+        if (this.shuffledPlayingTrackIndex > this.shuffledTrackIndexArray.length - 1) {
+          this.shuffledPlayingTrackIndex = 0;
+        }
+        nextTrackIndex = this.shuffledTrackIndexArray[this.shuffledPlayingTrackIndex];
+      }
+
+      this.play(nextTrackIndex);
     },
     playPrev() {
-      // TODO: 1.记录之前播放的歌曲索引，2.切换播放列表后清空，3.记录为空的时候播放当前索引-1的歌曲，如果当前索引为0，则播放最后一首歌曲
-      // this.prevTrackArray.pop();
-      // if (this.prevTrackArray.length >= 1) {
-      //   const prevTrack = this.prevTrackArray.pop();
-      //   // console.log(prevTrack);
-      //   if (prevTrack) {
-      //     this.playingTrackIndex = prevTrack.trackIndex;
-      //     this.playingPlaylistIndex = prevTrack.playListIndex;
-      //     this.play(this.playingTrackIndex, this.playingPlaylistIndex);
-      //   }
-      // } else {
-      //   this.play(this.playingTrackIndex, this.playingPlaylistIndex);
-      // }
+      const playlists = usePlaylistStore().getPlaylists;
+
+      const length = playlists[this.playingPlaylistId].tracks.length;
+      let nextTrackIndex = this.playingTrackIndex - 1;
+      if (nextTrackIndex < 0) {
+        nextTrackIndex = length - 1;
+      }
+
+      if (this.loopMode === "shuffle") {
+        this.shuffledPlayingTrackIndex--;
+        if (this.shuffledPlayingTrackIndex < 0) {
+          this.shuffledPlayingTrackIndex = this.shuffledTrackIndexArray.length - 1;
+        }
+        nextTrackIndex = this.shuffledTrackIndexArray[this.shuffledPlayingTrackIndex];
+      }
+
+      this.play(nextTrackIndex);
     },
     togglePlayMode() {
       if (this.loopMode === "repeat") {
         this.loopMode = "repeatOne";
       } else if (this.loopMode === "repeatOne") {
         this.loopMode = "shuffle";
+        this.shufflePlayingPlaylistArray();
+        this.shuffledPlayingTrackIndex = 0;
       } else {
         this.loopMode = "repeat";
       }
@@ -348,28 +357,26 @@ export const usePlayerStore = defineStore("player", {
         e.target.src = this.trackCoverImage;
       });
     },
+    shufflePlayingPlaylistArray() {
+      const playlists = usePlaylistStore().getPlaylists;
+      const length = playlists[this.playingPlaylistId].tracks.length - 1;
+
+      const array = [] as number[];
+      array.push(Math.floor(Math.random() * (length + 1)));
+      for (let i = 1; i < length; i++) {
+        const latest = array[i - 1];
+        const n = Math.floor(Math.random() * (length + 1));
+        if (n !== latest) {
+          array.push(n);
+        } else {
+          i--;
+        }
+      }
+      this.shuffledTrackIndexArray = array;
+      console.log(this.shuffledTrackIndexArray);
+    },
   },
   getters: {
     getTrack: (state) => state.track,
   },
 });
-
-function shuffleArray(length: number) {
-  const array = [] as number[];
-  array.push(Math.floor(Math.random() * (length + 1)));
-  for (let i = 1; i < length; i++) {
-    const latest = array[i - 1];
-    const n = Math.floor(Math.random() * (length + 1));
-    if (n !== latest) {
-      array.push(n);
-    } else {
-      i--;
-    }
-  }
-  return array;
-}
-
-interface PrevTrack {
-  trackIndex: number;
-  playListIndex: number;
-}
