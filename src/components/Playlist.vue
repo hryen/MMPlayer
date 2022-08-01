@@ -5,6 +5,7 @@ import { storeToRefs } from "pinia";
 import { walkDirectory } from "@/utils/musicTool";
 import { ref, nextTick } from "vue";
 import Spin from "@/components/Spin.vue";
+import TrackList from "@/components/TrackList.vue";
 
 const playlistStore = usePlaylistStore();
 const { playlists, showingPlaylistId } = storeToRefs(playlistStore);
@@ -16,8 +17,12 @@ const { playingPlaylistId, wavesurfer } = storeToRefs(playerStore);
 
 const isLoading = ref(false);
 
+const trackListLoading = ref(false);
 // TODO: 重新扫描文件夹的歌曲
-// TODO: 重新扫描所有文件夹的歌曲
+// 如果扫描的文件夹是当前正在显示的文件夹，则添加 tracklist 的加载中遮罩
+// 如果正在播放的音乐是当前歌单中的，停止正在播放的音乐
+
+// TODO: 重新扫描所有文件夹的歌曲，添加 tracklist 的加载中遮罩
 
 // 刷新歌单列表
 async function initPlaylist() {
@@ -142,6 +147,7 @@ ipcRenderer.on(
       </template>
     </div>
   </div>
+  <TrackList :loading="trackListLoading" />
 </template>
 
 <style>

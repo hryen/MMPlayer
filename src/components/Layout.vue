@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import Header from "@/components/Header.vue";
 import Playlist from "@/components/Playlist.vue";
-import TrackList from "@/components/TrackList.vue";
 import Player from "@/components/Player.vue";
 import Lyric from "@/components/Lyric.vue";
 </script>
@@ -11,7 +10,6 @@ import Lyric from "@/components/Lyric.vue";
 
   <div id="main">
     <Playlist />
-    <TrackList />
     <Lyric />
   </div>
 

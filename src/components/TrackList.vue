@@ -2,11 +2,13 @@
 import { storeToRefs } from "pinia";
 import { usePlaylistStore } from "@/stores/playlist";
 import { usePlayerStore } from "@/stores/player";
+import Spin from "@/components/Spin.vue";
 
 const { playlists, showingPlaylistId } = storeToRefs(usePlaylistStore());
 
 const playerStore = usePlayerStore();
 const { track } = storeToRefs(playerStore);
+const props = defineProps(["loading"]);
 
 // 右键菜单
 const { ipcRenderer, shell } = require("electron");
@@ -40,6 +42,7 @@ function backToTop() {
 
 <template>
   <div id="track-lists">
+    <Spin :loading="props.loading" tip="loading..." />
     <div id="track-list__title" class="track">
       <div class="track-index">#</div>
       <div class="track-title">标题</div>

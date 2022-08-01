@@ -53,7 +53,7 @@ const props = defineProps(["loading", "tip"]);
   top: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(255, 255, 255, 0.6);
+  background-color: rgba(255, 255, 255, 0.3);
   opacity: 0;
   transition: opacity 0.1s linear;
   pointer-events: none;
