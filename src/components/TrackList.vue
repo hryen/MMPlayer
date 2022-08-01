@@ -38,7 +38,6 @@ function backToTop() {
 }
 </script>
 
-<!-- TODO: 加载歌曲时显示加载中 -->
 <template>
   <div id="track-lists">
     <div id="track-list__title" class="track">

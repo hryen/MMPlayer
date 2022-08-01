@@ -16,6 +16,9 @@ const { playingPlaylistId, wavesurfer } = storeToRefs(playerStore);
 
 const isLoading = ref(false);
 
+// TODO: 重新扫描文件夹的歌曲
+// TODO: 重新扫描所有文件夹的歌曲
+
 // 刷新歌单列表
 async function initPlaylist() {
   isLoading.value = true;
