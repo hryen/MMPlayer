@@ -42,7 +42,7 @@ function backToTop() {
 
 <template>
   <div id="track-lists">
-    <Spin :loading="props.loading" tip="loading..." />
+    <Spin :loading="props.loading" tip="" />
     <div id="track-list__title" class="track">
       <div class="track-index">#</div>
       <div class="track-title">标题</div>

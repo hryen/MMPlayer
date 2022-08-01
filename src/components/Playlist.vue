@@ -24,14 +24,16 @@ const trackListLoading = ref(false);
 
 // TODO: 重新扫描所有文件夹的歌曲，添加 tracklist 的加载中遮罩
 
-// 刷新歌单列表
+// 刷新歌单和歌曲列表，从数据库中再查询一次
 async function initPlaylist() {
   isLoading.value = true;
+  trackListLoading.value = true;
   await playlistStore.init();
   nextTick(() => {
     // 延迟关闭，防止闪屏
     setTimeout(() => {
       isLoading.value = false;
+      trackListLoading.value = false;
     }, 300);
   });
 }
@@ -92,7 +94,7 @@ ipcRenderer.on(
 
 <template>
   <div id="left-menu">
-    <Spin :loading="isLoading" tip="loading..." />
+    <Spin :loading="isLoading" tip="" />
     <div class="left-menu__playlists-header">
       <div class="title">我的歌单</div>
 
