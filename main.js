@@ -166,12 +166,6 @@ ipcMain.on("showTrackMenu", (event, arg) => {
 ipcMain.on("showPlaylistMenu", (event, arg) => {
   const template = [
     {
-      label: "重新扫描该文件夹",
-      click: () => {
-        event.sender.send("showPlaylistMenu-reply", "refresh", arg);
-      },
-    },
-    {
       label: "打开目录",
       click: () => {
         event.sender.send("showPlaylistMenu-reply", "locateInExplorer", arg);

@@ -71,9 +71,6 @@ ipcRenderer.on(
   "showPlaylistMenu-reply",
   (_event: any, menu: string, id: string) => {
     switch (menu) {
-      case "refresh":
-        // TODO: 重新扫描该歌单
-        break;
       case "locateInExplorer":
         shell.openPath(playlists.value[id].path);
         break;
