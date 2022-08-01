@@ -114,19 +114,7 @@ export const usePlayerStore = defineStore("player", {
           this.wavesurfer.on("waveform-ready", seekToSaved);
         }
       } catch (e: any) {
-        console.error("读取保存的播放器设置失败");
-        console.error(e);
-        // 加载第一个列表中的第一首歌曲，不播放
-        // if (Object.values(playlists).length > 0) {
-        //   this.track = playLists.value[0].tracks[0] || {};
-
-        //   try {
-        //     const data = getPeakData(this.track.id);
-        //     this.wavesurfer.load(this.track.path, data, "metadata");
-        //   } catch (err) {
-        //     this.wavesurfer.load(this.track.path);
-        //   }
-        // }
+        console.error("读取保存的播放器设置失败:", e);
       }
 
       // console.log("wavesurfer init complete");
