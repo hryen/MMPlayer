@@ -166,7 +166,7 @@ ipcMain.on("showTrackMenu", (event, arg) => {
 ipcMain.on("showPlaylistMenu", (event, arg) => {
   const template = [
     {
-      label: "打开目录",
+      label: "在文件资源管理器中显示",
       click: () => {
         event.sender.send("showPlaylistMenu-reply", "locateInExplorer", arg);
       },
