@@ -361,7 +361,7 @@ export const usePlayerStore = defineStore("player", {
         }
       }
       this.shuffledTrackIndexArray = array;
-      console.log(this.shuffledTrackIndexArray);
+      // console.log(this.shuffledTrackIndexArray);
     },
   },
   getters: {
