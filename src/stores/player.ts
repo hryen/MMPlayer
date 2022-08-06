@@ -336,8 +336,7 @@ export const usePlayerStore = defineStore("player", {
 
     emptyTrackInfo() {
       this.trackCoverImage = config.defaultCoverImage;
-      this.track.title = "";
-      this.track.artist = "";
+      this.track = {} as Track;
     },
     handleImageError(e: any) {
       e.target.src = config.defaultCoverImage;
