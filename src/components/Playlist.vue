@@ -2,7 +2,7 @@
 import { usePlaylistStore } from "@/stores/playlist";
 import { usePlayerStore } from "@/stores/player";
 import { storeToRefs } from "pinia";
-import { walkDirectory } from "@/utils/musicTool";
+import { walkDirectory, reWalkDirectory } from "@/utils/musicTool";
 import { ref, nextTick } from "vue";
 import Spin from "@/components/Spin.vue";
 import TrackList from "@/components/TrackList.vue";
@@ -18,9 +18,20 @@ const { playingPlaylistId, wavesurfer } = storeToRefs(playerStore);
 const isLoading = ref(false);
 
 const trackListLoading = ref(false);
-// TODO: 重新扫描文件夹的歌曲
+// 重新扫描文件夹的歌曲
 // 如果扫描的文件夹是当前正在显示的文件夹，则添加 tracklist 的加载中遮罩
 // 如果正在播放的音乐是当前歌单中的，停止正在播放的音乐
+async function handleReWalkDirectory(id: string) {
+  if (playingPlaylistId.value === id) {
+    wavesurfer.value.empty();
+    playerStore.emptyTrackInfo();
+  }
+  isLoading.value = true;
+  await reWalkDirectory(id).catch((stderr: string) => {
+    console.error("重新扫描歌单时出错", stderr);
+  });
+  initPlaylist();
+}
 
 // TODO: 重新扫描所有文件夹的歌曲，添加 tracklist 的加载中遮罩
 
@@ -81,6 +92,9 @@ ipcRenderer.on(
   "showPlaylistMenu-reply",
   (_event: any, menu: string, id: string) => {
     switch (menu) {
+      case "reWalkDirectory":
+        handleReWalkDirectory(id);
+        break;
       case "locateInExplorer":
         shell.openPath(playlists.value[id].path);
         break;

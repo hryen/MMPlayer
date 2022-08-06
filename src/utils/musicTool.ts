@@ -14,6 +14,20 @@ export async function walkDirectory(dirPath: string): Promise<string> {
   }
 }
 
+export async function reWalkDirectory(id: string): Promise<string> {
+  const util = require("node:util");
+  const execFile = util.promisify(require("node:child_process").execFile);
+  const { stdout, stderr } = await execFile(config.MusicToolsFile, [
+    "rewalk",
+    id,
+  ]);
+  if (stderr) {
+    return Promise.reject(stderr);
+  } else {
+    return Promise.resolve(stdout);
+  }
+}
+
 export function getPeakData(trackId: string): string {
   const path = require("path");
   const fs = require("fs");
