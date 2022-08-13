@@ -77,6 +77,7 @@ export const usePlayerStore = defineStore("player", {
       this.wavesurfer = WaveSurfer.create(options);
 
       // WaveSurfer Events
+      this.wavesurfer.on("error", this.handleOnError);
       this.wavesurfer.on("play", this.handleOnPlay);
       this.wavesurfer.on("pause", this.handleOnPause);
       this.wavesurfer.on("seek", this.handleOnSeek);
@@ -118,6 +119,12 @@ export const usePlayerStore = defineStore("player", {
       }
 
       // console.log("wavesurfer init complete");
+    },
+    handleOnError(msg: Error) {
+      if (msg.message === "Failed to fetch") {
+        const { ipcRenderer } = require("electron");
+        ipcRenderer.send("dialogErrorMessage", ["播放错误", "加载音频文件失败"]);
+      }
     },
     handleOnPlay() {
       this.isPlaying = true;
@@ -277,10 +284,14 @@ export const usePlayerStore = defineStore("player", {
 
       if (this.loopMode === "shuffle") {
         this.shuffledPlayingTrackIndex++;
-        if (this.shuffledPlayingTrackIndex > this.shuffledTrackIndexArray.length - 1) {
+        if (
+          this.shuffledPlayingTrackIndex >
+          this.shuffledTrackIndexArray.length - 1
+        ) {
           this.shuffledPlayingTrackIndex = 0;
         }
-        nextTrackIndex = this.shuffledTrackIndexArray[this.shuffledPlayingTrackIndex];
+        nextTrackIndex =
+          this.shuffledTrackIndexArray[this.shuffledPlayingTrackIndex];
       }
 
       this.play(nextTrackIndex);
@@ -297,9 +308,11 @@ export const usePlayerStore = defineStore("player", {
       if (this.loopMode === "shuffle") {
         this.shuffledPlayingTrackIndex--;
         if (this.shuffledPlayingTrackIndex < 0) {
-          this.shuffledPlayingTrackIndex = this.shuffledTrackIndexArray.length - 1;
+          this.shuffledPlayingTrackIndex =
+            this.shuffledTrackIndexArray.length - 1;
         }
-        nextTrackIndex = this.shuffledTrackIndexArray[this.shuffledPlayingTrackIndex];
+        nextTrackIndex =
+          this.shuffledTrackIndexArray[this.shuffledPlayingTrackIndex];
       }
 
       this.play(nextTrackIndex);

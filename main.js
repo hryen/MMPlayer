@@ -192,3 +192,10 @@ ipcMain.on("showPlaylistMenu", (event, arg) => {
 ipcMain.on("changePlayStatus", (_event, arg) => {
   setThumbarButtons(arg);
 });
+
+// 错误提示对话框
+// arg[0]为提示的标题
+// arg[1]为提示的消息内容
+ipcMain.on("dialogErrorMessage", (_event, arg) => {
+  dialog.showErrorBox(arg[0], arg[1]);
+});
