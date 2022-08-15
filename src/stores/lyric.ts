@@ -90,7 +90,7 @@ export const useLyricStore = defineStore("lyric", {
         if (_this.nextLyricIndex === lyrics.length) return;
 
         if (trackCurrentTime.value >= l.time) {
-          _this.showLyric(_this.nextLyricIndex);
+          _this.showLyric(_this.nextLyricIndex - 1);
           _this.nextLyricIndex++;
         }
       }, 300);
@@ -118,7 +118,7 @@ export const useLyricStore = defineStore("lyric", {
       if (trackCurrentTime.value > lyrics[lyrics.length - 1].time) {
         this.nextLyricIndex = lyrics.length;
       } else {
-        for (let i = 0; i < lyrics.length; i++) {
+        for (let i = 1; i <= lyrics.length; i++) {
           if (lyrics[i].time > trackCurrentTime.value) {
             this.nextLyricIndex = i;
             break;
@@ -126,7 +126,7 @@ export const useLyricStore = defineStore("lyric", {
         }
       }
 
-      this.showLyric(this.nextLyricIndex);
+      this.showLyric(this.nextLyricIndex - 1);
     },
     closeLyricPage() {
       this.lyricPageVisible = false;
