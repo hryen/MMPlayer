@@ -154,6 +154,7 @@ export const usePlayerStore = defineStore("player", {
     handleOnFinish() {
       if (this.loopMode === "repeatOne") {
         this.playPause();
+        useLyricStore().resetLyricIndex();
       } else {
         // this.playNext();
         const _this = this;

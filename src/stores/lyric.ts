@@ -131,5 +131,9 @@ export const useLyricStore = defineStore("lyric", {
     closeLyricPage() {
       this.lyricPageVisible = false;
     },
+    resetLyricIndex() {
+      this.nextLyricIndex = 1;
+      this.showLyric(0);
+    }
   },
 });
