@@ -1,4 +1,4 @@
-import config from "@/config";
+import { config } from "@/config";
 
 export async function walkDirectory(dirPath: string): Promise<string> {
   const util = require("node:util");
@@ -6,7 +6,7 @@ export async function walkDirectory(dirPath: string): Promise<string> {
   const { stdout, stderr } = await execFile(config.MusicToolsFile, [
     "walk",
     dirPath,
-  ]);
+  ], { cwd: config.UserDataPath });
   if (stderr) {
     return Promise.reject(stderr);
   } else {
@@ -20,7 +20,7 @@ export async function reWalkDirectory(id: string): Promise<string> {
   const { stdout, stderr } = await execFile(config.MusicToolsFile, [
     "rewalk",
     id,
-  ]);
+  ], { cwd: config.UserDataPath });
   if (stderr) {
     return Promise.reject(stderr);
   } else {
@@ -32,8 +32,7 @@ export function getPeakData(trackId: string): string {
   const path = require("path");
   const fs = require("fs");
   const peekFile = path.resolve(
-    process.cwd(),
-    "cache",
+    config.UserDataPath,
     "peak_data",
     trackId + ".json"
   );
@@ -44,10 +43,9 @@ export async function exportImage(
   filePath: string,
   exportPath: string
 ): Promise<string> {
-
   const path = require("path");
   const fs = require("fs");
-  const imageCacheDir = path.resolve(process.cwd(), "cache", "export_image");
+  const imageCacheDir = path.resolve(config.UserDataPath, "export_image");
   if (!fs.existsSync(imageCacheDir)) {
     fs.mkdirSync(imageCacheDir, { recursive: true });
   }

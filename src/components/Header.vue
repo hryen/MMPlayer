@@ -4,7 +4,7 @@ import { usePlayerStore } from "@/stores/player";
 import { useLyricStore } from "@/stores/lyric";
 import { storeToRefs } from "pinia";
 import PlayerSettings from "@/models/playerSettings";
-import config from "@/config";
+import  { config } from "@/config";
 
 const { ipcRenderer } = require("electron");
 const isMaximized = ref(false);

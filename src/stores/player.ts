@@ -1,7 +1,7 @@
 import { nextTick } from "vue";
 import { defineStore, storeToRefs } from "pinia";
 
-import config from "@/config";
+import { config } from "@/config";
 import PlayerSettings from "@/models/playerSettings";
 import Track from "@/models/track";
 import { usePlaylistStore } from "@/stores/playlist";
@@ -176,8 +176,7 @@ export const usePlayerStore = defineStore("player", {
       const path = require("path");
       const fs = require("fs");
       const peakFile = path.resolve(
-        process.cwd(),
-        "cache",
+        config.UserDataPath,
         "peak_data",
         this.track.id + ".json"
       );

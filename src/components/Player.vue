@@ -3,6 +3,7 @@ import { usePlayerStore } from "@/stores/player";
 import { useLyricStore } from "@/stores/lyric";
 import { storeToRefs } from "pinia";
 import { watch } from "vue";
+import { config } from "@/config";
 
 const playerStore = usePlayerStore();
 const {
@@ -18,8 +19,7 @@ const {
 watch(track, () => {
   const path = require("path");
   trackCoverImage.value = path.resolve(
-    process.cwd(),
-    "cache",
+    config.UserDataPath,
     "export_image",
     track.value.id + ".jpg"
   );

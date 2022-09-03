@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { Playlist } from "@/models/playlist";
-import config from "@/config";
+import { config } from "@/config";
 import Track from "@/models/track";
 
 export const usePlaylistStore = defineStore("playlist", {

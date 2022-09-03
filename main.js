@@ -71,7 +71,7 @@ app.whenReady().then(() => {
 
   mainWindow.once("ready-to-show", () => {
     mainWindow.show();
-    mainWindow.webContents.send("rendered");
+    mainWindow.webContents.send("rendered", app.getPath("userData"));
     setThumbarButtons(false);
   });
 

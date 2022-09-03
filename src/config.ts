@@ -1,12 +1,9 @@
 const path = require("path");
 
-const config = {
-  DatabaseFile: path.resolve(process.cwd(), "tools", "data.db") as string,
-
-  PlayerSettingsFile: path.resolve(
-    process.cwd(),
-    "PlayerSettings.json"
-  ) as string,
+export const config = {
+  UserDataPath: "",
+  DatabaseFile: "",
+  PlayerSettingsFile: "",
 
   MusicToolsFile: path.resolve(
     process.cwd(),
@@ -17,4 +14,16 @@ const config = {
   defaultCoverImage: "./assets/album_black_48dp.svg" as string,
 };
 
-export default config;
+export function initConfig(userDataPath: string) {
+  config.UserDataPath = userDataPath;
+
+  config.DatabaseFile = path.resolve(
+    userDataPath,
+    "data.db"
+  ) as string;
+
+  config.PlayerSettingsFile = path.resolve(
+    userDataPath,
+    "PlayerSettings.json"
+  ) as string;
+}
